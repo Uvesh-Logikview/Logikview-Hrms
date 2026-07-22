@@ -253,11 +253,15 @@ app_license = "mit"
 # --------
 # Version-controlled config that reproduces the whole GPS check-in feature on any
 # site via `bench install-app logikview_hr`. Custom HTML Block must import before
-# the Home workspace that references it.
+# the "My Attendance" workspace that references it.
 fixtures = [
 	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours"]]]},
 	{"dt": "Custom HTML Block", "filters": [["name", "=", "Checkin button functionality"]]},
 	{"dt": "Custom Field", "filters": [["name", "=", "Employee Checkin-custom_location_accuracy"]]},
-	{"dt": "Workspace", "filters": [["name", "=", "Home"]]},
+	{"dt": "Workspace", "filters": [["name", "=", "My Attendance"]]},
 	{"dt": "Logikview Checkin Settings"},
 ]
+
+# Desk cleanup: keep only HR-relevant workspaces on install and after every migrate.
+after_install = "logikview_hr.workspace_setup.hide_non_hr_workspaces"
+after_migrate = "logikview_hr.workspace_setup.hide_non_hr_workspaces"
