@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-22 17:19:01.886876",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "latitude",
+  "longitude",
+  "radius_km",
+  "max_accuracy_m"
+ ],
+ "fields": [
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Office Latitude",
+   "precision": "9",
+   "reqd": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Office Longitude",
+   "precision": "9",
+   "reqd": 1
+  },
+  {
+   "default": "0.7",
+   "fieldname": "radius_km",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Geofence Radius (km)",
+   "precision": "3",
+   "reqd": 1
+  },
+  {
+   "default": "200",
+   "fieldname": "max_accuracy_m",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Max GPS Accuracy (m)",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-22 17:19:01.886876",
+ "modified_by": "Administrator",
+ "module": "Logikview HR",
+ "name": "Logikview Checkin Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
