@@ -258,10 +258,10 @@ fixtures = [
 	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours"]]]},
 	{"dt": "Custom HTML Block", "filters": [["name", "=", "Checkin button functionality"]]},
 	{"dt": "Custom Field", "filters": [["name", "=", "Employee Checkin-custom_location_accuracy"]]},
-	{"dt": "Workspace", "filters": [["name", "=", "My Attendance"]]},
 	{"dt": "Logikview Checkin Settings"},
 ]
 
-# Desk cleanup: keep only HR-relevant workspaces on install and after every migrate.
-after_install = "logikview_hr.workspace_setup.hide_non_hr_workspaces"
-after_migrate = "logikview_hr.workspace_setup.hide_non_hr_workspaces"
+# Desk setup: build the Home dashboard (check-in card + Employee Details shortcuts)
+# and trim the sidebar to HR, on install and after every migrate.
+after_install = "logikview_hr.workspace_setup.setup_desk"
+after_migrate = "logikview_hr.workspace_setup.setup_desk"
