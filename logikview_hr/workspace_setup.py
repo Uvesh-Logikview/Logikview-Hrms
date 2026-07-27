@@ -7,6 +7,7 @@ import frappe
 # (is_hidden on non-HR workspaces) shown to every role.
 
 CARD = "Checkin button functionality"
+CALENDAR = "Attendance Calendar"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -49,6 +50,10 @@ def _home_content():
 	for i, s in enumerate(SHORTCUTS):
 		blocks.append({"id": f"lvh_sc{i}", "type": "shortcut",
 		               "data": {"shortcut_name": s["label"], "col": 4}})
+	blocks.append({"id": "lvh_cal_hdr", "type": "header",
+	               "data": {"text": '<span class="h4"><b>Attendance Calendar</b></span>', "col": 12}})
+	blocks.append({"id": "lvh_cal", "type": "custom_block",
+	               "data": {"custom_block_name": CALENDAR, "col": 12}})
 	return json.dumps(blocks)
 
 
@@ -62,7 +67,8 @@ def _setup_home():
 		ws.append("shortcuts", {**s, "idx": i})
 	# a content custom_block resolves by matching custom_block_name against the
 	# child row's label, so label MUST equal the block name.
-	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD}])
+	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD},
+	                         {"custom_block_name": CALENDAR, "label": CALENDAR}])
 	ws.flags.ignore_permissions = True
 	ws.save()
 
