@@ -256,7 +256,7 @@ app_license = "mit"
 # the "My Attendance" workspace that references it.
 fixtures = [
 	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours"]]]},
-	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar"]]]},
+	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard"]]]},
 	{"dt": "Custom Field", "filters": [["name", "=", "Employee Checkin-custom_location_accuracy"]]},
 	{"dt": "Logikview Checkin Settings"},
 ]

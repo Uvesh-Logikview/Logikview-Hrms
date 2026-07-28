@@ -8,6 +8,7 @@ import frappe
 
 CARD = "Checkin button functionality"
 CALENDAR = "Attendance Calendar"
+DASHBOARD = "Attendance Dashboard"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -73,15 +74,36 @@ def _setup_home():
 	ws.save()
 
 
+def _setup_dashboard():
+	# HR/admin-only "Attendance Dashboard" workspace (worked hours, late/early, per day)
+	content = [
+		{"id": "dash_hdr", "type": "header",
+		 "data": {"text": '<span class="h4"><b>Team Attendance</b></span>', "col": 12}},
+		{"id": "dash_blk", "type": "custom_block", "data": {"custom_block_name": DASHBOARD, "col": 12}},
+	]
+	if frappe.db.exists("Workspace", DASHBOARD):
+		frappe.delete_doc("Workspace", DASHBOARD, force=1, ignore_permissions=True)
+	ws = frappe.get_doc({
+		"doctype": "Workspace", "name": DASHBOARD, "title": DASHBOARD, "label": DASHBOARD,
+		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "users", "sequence_id": 0.2,
+		"content": json.dumps(content),
+		"custom_blocks": [{"custom_block_name": DASHBOARD, "label": DASHBOARD}],
+		"roles": [{"role": "HR Manager"}],   # only HR Manager + Workspace Manager (admin) see it
+	})
+	ws.flags.ignore_permissions = True
+	ws.insert()
+	frappe.db.commit()
+
+
 def _apply_visibility():
 	# same trimmed sidebar for every role (is_hidden hides for all, incl. admin)
 	for w in frappe.get_all("Workspace", fields=["name", "public"]):
-		if not w.public:
+		if not w.public or w.name == DASHBOARD:
 			continue
 		frappe.db.set_value("Workspace", w.name, "is_hidden",
 		                    0 if w.name in VISIBLE else 1, update_modified=False)
-	# drop any per-workspace role restriction (we don't gate by role — hrsystem doesn't)
-	frappe.db.delete("Has Role", {"parenttype": "Workspace"})
+	# drop per-workspace role restrictions EXCEPT the HR-only dashboard's
+	frappe.db.delete("Has Role", {"parenttype": "Workspace", "parent": ["!=", DASHBOARD]})
 	frappe.db.commit()
 
 
@@ -99,6 +121,7 @@ def setup_desk():
 	frappe.conf.developer_mode = 0
 	try:
 		_setup_home()
+		_setup_dashboard()
 		_apply_visibility()
 		_remove_my_attendance()
 	finally:
