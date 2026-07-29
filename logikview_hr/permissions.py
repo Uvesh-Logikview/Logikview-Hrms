@@ -10,6 +10,10 @@ import frappe
 # roles that may see every employee's data
 FULL_ACCESS_ROLES = {"HR Manager", "HR User", "System Manager"}
 
+# system-managed records: employees may only READ their own — never create/edit/delete
+# (check-ins & attendance are created by the check-in server script, not by hand)
+READ_ONLY_FOR_EMPLOYEE = {"Employee Checkin", "Attendance", "Leave Allocation"}
+
 
 def _has_full_access(user):
 	return bool(FULL_ACCESS_ROLES & set(frappe.get_roles(user)))
@@ -82,4 +86,7 @@ def employee_linked_has_permission(doc, ptype=None, user=None):
 	user = user or frappe.session.user
 	if _has_full_access(user):
 		return True
+	# check-ins / attendance / allocations are system-managed: read-only for employees
+	if doc.doctype in READ_ONLY_FOR_EMPLOYEE and ptype and ptype not in ("read", "select"):
+		return False
 	return doc.get("employee") in _visible_employees(user)
