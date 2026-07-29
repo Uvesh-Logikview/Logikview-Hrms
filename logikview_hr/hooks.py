@@ -265,3 +265,25 @@ fixtures = [
 # and trim the sidebar to HR, on install and after every migrate.
 after_install = "logikview_hr.workspace_setup.setup_desk"
 after_migrate = "logikview_hr.workspace_setup.setup_desk"
+
+# Row-level visibility: employees see only their own records (+ direct reports for
+# managers); HR Manager / HR User / System Manager see all.
+permission_query_conditions = {
+	"Employee": "logikview_hr.permissions.employee_query",
+	"Attendance": "logikview_hr.permissions.attendance_query",
+	"Leave Application": "logikview_hr.permissions.leave_application_query",
+	"Employee Checkin": "logikview_hr.permissions.employee_checkin_query",
+	"Expense Claim": "logikview_hr.permissions.expense_claim_query",
+	"Attendance Request": "logikview_hr.permissions.attendance_request_query",
+	"Leave Allocation": "logikview_hr.permissions.leave_allocation_query",
+}
+
+has_permission = {
+	"Employee": "logikview_hr.permissions.employee_has_permission",
+	"Attendance": "logikview_hr.permissions.employee_linked_has_permission",
+	"Leave Application": "logikview_hr.permissions.employee_linked_has_permission",
+	"Employee Checkin": "logikview_hr.permissions.employee_linked_has_permission",
+	"Expense Claim": "logikview_hr.permissions.employee_linked_has_permission",
+	"Attendance Request": "logikview_hr.permissions.employee_linked_has_permission",
+	"Leave Allocation": "logikview_hr.permissions.employee_linked_has_permission",
+}
