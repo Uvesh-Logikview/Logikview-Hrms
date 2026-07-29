@@ -123,6 +123,20 @@ def _remove_my_attendance():
 		frappe.db.commit()
 
 
+def _lock_readonly_doctypes():
+	"""Employee role = read-only on check-ins & attendance (created by the check-in
+	flow, not by hand). Removing write/create/delete makes the form open read-only
+	for employees; HR/admin keep full access. Stored as Custom DocPerm (persists)."""
+	from frappe.permissions import update_permission_property
+	for dt in ("Employee Checkin", "Attendance"):
+		for ptype in ("write", "create", "delete", "amend"):
+			try:
+				update_permission_property(dt, "Employee", 0, ptype, 0, validate=False)
+			except Exception:
+				pass
+	frappe.db.commit()
+
+
 def setup_desk():
 	"""Idempotent; wired to after_install and after_migrate so a migrate that
 	re-syncs the standard Home from ERPNext source can't undo our layout."""
@@ -134,6 +148,7 @@ def setup_desk():
 		_setup_dashboard()
 		_apply_visibility()
 		_remove_my_attendance()
+		_lock_readonly_doctypes()
 	finally:
 		frappe.conf.developer_mode = orig_dev
 	frappe.db.commit()
