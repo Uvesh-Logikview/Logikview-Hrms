@@ -257,7 +257,16 @@ app_license = "mit"
 fixtures = [
 	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours"]]]},
 	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard"]]]},
-	{"dt": "Custom Field", "filters": [["name", "=", "Employee Checkin-custom_location_accuracy"]]},
+	{"dt": "Custom Field", "filters": [["name", "in", [
+		"Employee Checkin-custom_location_accuracy",
+		"Attendance Request-custom_late_category",
+		"Attendance Request-custom_late_by_minutes",
+	]]]},
+	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
+	# "Regularization", and the late-category colour indicator on the list view.
+	{"dt": "Property Setter", "filters": [["name", "=", "Attendance Request-reason-options"]]},
+	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
+	{"dt": "Client Script", "filters": [["name", "=", "Regularization Late Colours"]]},
 	{"dt": "Logikview Checkin Settings"},
 ]
 

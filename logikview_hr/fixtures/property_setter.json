@@ -1,0 +1,18 @@
+[
+ {
+  "default_value": null,
+  "doc_type": "Attendance Request",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "reason",
+  "is_system_generated": 1,
+  "modified": "2026-07-31 11:09:59.697808",
+  "module": null,
+  "name": "Attendance Request-reason-options",
+  "property": "options",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "Work From Home\nOn Duty\nLate Arrival"
+ }
+]

@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Attendance Request",
+  "enabled": 1,
+  "modified": "2026-07-31 11:12:32.650895",
+  "module": null,
+  "name": "Regularization Late Colours",
+  "script": "frappe.listview_settings['Attendance Request'] = {\n    get_indicator: function (doc) {\n        const map = {\n            'Late \\u226415 min': 'yellow',\n            'Late 15-30 min': 'orange',\n            'Late 30-60 min': 'purple',\n            'Late 1-2 hr': 'pink',\n            'Late >2 hr': 'red'\n        };\n        if (doc.custom_late_category && map[doc.custom_late_category]) {\n            return [__(doc.custom_late_category), map[doc.custom_late_category], 'custom_late_category,=,' + doc.custom_late_category];\n        }\n        if (doc.docstatus === 1) return [__('Approved'), 'green', 'docstatus,=,1'];\n        return [__('Pending'), 'grey', 'docstatus,=,0'];\n    }\n};",
+  "view": "List"
+ }
+]
