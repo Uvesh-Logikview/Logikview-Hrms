@@ -37,7 +37,9 @@
   "employee_user",
   "ro_user",
   "first_director_user",
-  "second_director_user"
+  "second_director_user",
+  "cc_director",
+  "cc_director_user"
  ],
  "fields": [
   {
@@ -252,12 +254,30 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "description": "Kept informed of this appraisal but not a required reviewer.",
+   "fieldname": "cc_director",
+   "fieldtype": "Link",
+   "label": "In-the-loop Director (CC)",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "cc_director.user_id",
+   "fieldname": "cc_director_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "cc_director_user",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-03 11:47:27.707264",
+ "modified": "2026-08-03 11:55:16.238873",
  "modified_by": "Administrator",
  "module": "Logikview HR",
  "name": "Logikview Appraisal",

@@ -5,7 +5,9 @@
   "docstatus": 0,
   "doctype": "Logikview Appraisal Settings",
   "general_departments": "Accounts - LA\nMarketing - LA\nSales - LA\nPurchase - LA\nOperations - LA\nProduction - LA\nDispatch - LA\nCustomer Service - LA\nHuman Resources - LA\nHR - LA\nManagement - LA\nQuality Management - LA\nLegal - LA",
-  "modified": "2026-08-03 11:40:23.475752",
+  "loop_departments": "Frappe Team - LA",
+  "loop_director": "LOGIK-0001",
+  "modified": "2026-08-03 11:55:17.572556",
   "name": "Logikview Appraisal Settings",
   "notify_days_before": 7,
   "overdue_months": 4

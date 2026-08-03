@@ -12,7 +12,10 @@
   "notify_days_before",
   "overdue_months",
   "sb1",
-  "general_departments"
+  "general_departments",
+  "sb_loop",
+  "loop_director",
+  "loop_departments"
  ],
  "fields": [
   {
@@ -55,13 +58,31 @@
    "fieldname": "general_departments",
    "fieldtype": "Small Text",
    "label": "General Departments (one per line)"
+  },
+  {
+   "fieldname": "sb_loop",
+   "fieldtype": "Section Break",
+   "label": "Keep-in-loop (CC) Director"
+  },
+  {
+   "description": "Notified about \u2014 but not a reviewer of \u2014 appraisals in the loop departments below.",
+   "fieldname": "loop_director",
+   "fieldtype": "Link",
+   "label": "Loop Director (CC)",
+   "options": "Employee"
+  },
+  {
+   "description": "Employees in these departments keep the Loop Director in the loop.",
+   "fieldname": "loop_departments",
+   "fieldtype": "Small Text",
+   "label": "Loop Departments (one per line)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-03 11:38:41.446944",
+ "modified": "2026-08-03 11:55:17.322309",
  "modified_by": "Administrator",
  "module": "Logikview HR",
  "name": "Logikview Appraisal Settings",

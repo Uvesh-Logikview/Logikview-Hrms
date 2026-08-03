@@ -321,3 +321,10 @@ scheduler_events = {
 		"logikview_hr.appraisal.send_appraisal_reminders",
 	],
 }
+
+doc_events = {
+	"Logikview Appraisal": {
+		# notify the in-the-loop (CC) director whenever the appraisal advances a stage
+		"on_update": "logikview_hr.appraisal.on_appraisal_update",
+	},
+}

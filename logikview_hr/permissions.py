@@ -105,7 +105,8 @@ def appraisal_query(user):
 	e = frappe.db.escape(emp)
 	t = "`tabLogikview Appraisal`"
 	return (f"({t}.`employee`={e} or {t}.`reporting_officer`={e} "
-	        f"or {t}.`first_director`={e} or {t}.`second_director`={e})")
+	        f"or {t}.`first_director`={e} or {t}.`second_director`={e} "
+	        f"or {t}.`cc_director`={e})")
 
 
 def appraisal_has_permission(doc, ptype=None, user=None):
@@ -116,4 +117,5 @@ def appraisal_has_permission(doc, ptype=None, user=None):
 	if not emp:
 		return False
 	return emp in (doc.get("employee"), doc.get("reporting_officer"),
-	               doc.get("first_director"), doc.get("second_director"))
+	               doc.get("first_director"), doc.get("second_director"),
+	               doc.get("cc_director"))

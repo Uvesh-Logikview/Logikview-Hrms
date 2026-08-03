@@ -119,6 +119,13 @@ def create_appraisal(employee, anniversary_date, years):
     assessment_type = "General" if emp.department in _general_departments(s) else "Technical"
     first_director, needs_second, second_director = _top_director(employee, d_one, d_two)
 
+    # keep-in-loop (CC) director: notified but not a reviewer (e.g. Pranjal for the
+    # Frappe team, which reports up to Sumeet). Skip if he's already in the chain.
+    loop_depts = {d.strip() for d in (s.loop_departments or "").splitlines() if d.strip()}
+    cc_director = s.loop_director if (emp.department in loop_depts and s.loop_director) else None
+    if cc_director in (first_director, second_director):
+        cc_director = None
+
     doc = frappe.get_doc({
         "doctype": "Logikview Appraisal",
         "employee": employee,
@@ -129,6 +136,7 @@ def create_appraisal(employee, anniversary_date, years):
         "first_director": first_director,
         "needs_second_director": needs_second,
         "second_director": second_director,
+        "cc_director": cc_director,
         "workflow_state": "Pending Self-Assessment",
         "ratings": _rating_rows(assessment_type),
     })
@@ -144,7 +152,26 @@ def create_appraisal(employee, anniversary_date, years):
     _notify([_user_of(employee)], subject, msg, doc.name, "created-emp")
     _notify(hr, f"Appraisal started for {emp.employee_name} ({years} yrs)",
             f"An appraisal ({doc.name}) was auto-created for {emp.employee_name}.", doc.name, "created-hr")
+    if cc_director:
+        _notify([_user_of(cc_director)], f"In the loop: appraisal started for {emp.employee_name}",
+                f"You're being kept in the loop for {emp.employee_name}'s appraisal ({doc.name}). "
+                f"No action needed from you — you'll be notified as it progresses.", doc.name, "created-cc")
     return doc.name
+
+
+def on_appraisal_update(doc, method=None):
+    """Keep the in-the-loop (CC) director informed whenever the appraisal advances."""
+    if not doc.get("cc_director"):
+        return
+    before = doc.get_doc_before_save()
+    if not before or before.workflow_state == doc.workflow_state:
+        return
+    user = _user_of(doc.cc_director)
+    if not user:
+        return
+    _notify([user], f"Appraisal update: {doc.employee_name} — {doc.workflow_state}",
+            f"The appraisal {doc.name} for {doc.employee_name} moved to '{doc.workflow_state}'.",
+            doc.name, f"cc-{doc.workflow_state}")
 
 
 def _is_anniversary(doj, target):
@@ -191,8 +218,8 @@ def send_appraisal_reminders():
     for ap in frappe.get_all("Logikview Appraisal",
                              filters={"workflow_state": ["!=", "Completed"]},
                              fields=["name", "employee", "employee_name", "reporting_officer",
-                                     "first_director", "second_director", "workflow_state",
-                                     "anniversary_date"]):
+                                     "first_director", "second_director", "cc_director",
+                                     "workflow_state", "anniversary_date"]):
         actor_field = STATE_ACTOR.get(ap.workflow_state)
         actor_emp = ap.get(actor_field) if actor_field else None
         actor_user = _user_of(actor_emp)
@@ -202,7 +229,8 @@ def send_appraisal_reminders():
         if overdue:
             # daily, to everyone involved
             recipients = [_user_of(ap.employee), _user_of(ap.reporting_officer),
-                          _user_of(ap.first_director), _user_of(ap.second_director)] + hr
+                          _user_of(ap.first_director), _user_of(ap.second_director),
+                          _user_of(ap.cc_director)] + hr
             subj = f"OVERDUE appraisal: {ap.employee_name} ({ap.workflow_state})"
             msg = (f"The appraisal {ap.name} for {ap.employee_name} has been pending for over "
                    f"{overdue_months} months (stage: {ap.workflow_state}). Please act on it today.")
