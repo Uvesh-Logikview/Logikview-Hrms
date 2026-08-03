@@ -9,5 +9,16 @@
   "name": "Regularization Late Colours",
   "script": "frappe.listview_settings['Attendance Request'] = {\n    get_indicator: function (doc) {\n        const map = {\n            'Late \\u226415 min': 'yellow',\n            'Late 15-30 min': 'orange',\n            'Late 30-60 min': 'purple',\n            'Late 1-2 hr': 'pink',\n            'Late >2 hr': 'red'\n        };\n        if (doc.custom_late_category && map[doc.custom_late_category]) {\n            return [__(doc.custom_late_category), map[doc.custom_late_category], 'custom_late_category,=,' + doc.custom_late_category];\n        }\n        if (doc.docstatus === 1) return [__('Approved'), 'green', 'docstatus,=,1'];\n        return [__('Pending'), 'grey', 'docstatus,=,0'];\n    }\n};",
   "view": "List"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Logikview Appraisal",
+  "enabled": 1,
+  "modified": "2026-08-03 11:47:28.622422",
+  "module": null,
+  "name": "Logikview Appraisal Field Locks",
+  "script": "\nfrappe.ui.form.on('Logikview Appraisal', {\n    refresh(frm) {\n        const me = frappe.session.user;\n        const st = frm.doc.workflow_state;\n        const isEmp = me === frm.doc.employee_user;\n        const isRO  = me === frm.doc.ro_user;\n        const isD1  = me === frm.doc.first_director_user;\n        const isD2  = me === frm.doc.second_director_user;\n        const isHR  = frappe.user.has_role('HR Manager') || frappe.user.has_role('System Manager');\n\n        const empEdit = (st === 'Pending Self-Assessment') && (isEmp || isHR);\n        const roEdit  = (st === 'Pending Manager Review')   && (isRO  || isHR);\n        const d1Edit  = (st === 'Pending Director Review')  && (isD1  || isHR);\n        const d2Edit  = (st === 'Pending Final Director')   && (isD2  || isHR);\n\n        // child-table rating columns\n        const grid = frm.fields_dict.ratings.grid;\n        grid.update_docfield_property('employee_rating', 'read_only', empEdit ? 0 : 1);\n        grid.update_docfield_property('ro_rating',       'read_only', roEdit  ? 0 : 1);\n        frm.refresh_field('ratings');\n\n        // narratives (employee)\n        ['q_accomplishments', 'q_not_accomplished', 'q_goals'].forEach(f =>\n            frm.set_df_property(f, 'read_only', empEdit ? 0 : 1));\n\n        // director feedback\n        frm.set_df_property('first_director_feedback',  'read_only', d1Edit ? 0 : 1);\n        frm.set_df_property('second_director_feedback', 'read_only', d2Edit ? 0 : 1);\n\n        // gentle hint on whose turn it is\n        const hint = {\n            'Pending Self-Assessment': 'Employee to fill the self-assessment (Your Rating + the three questions).',\n            'Pending Manager Review':  'Reporting officer to fill the RO Rating column.',\n            'Pending Director Review': 'Director to add their feedback comment.',\n            'Pending Final Director':  'Final director (Sumeet) to add closing feedback.',\n            'Completed':               'Appraisal completed.'\n        }[st];\n        if (hint) frm.dashboard.set_headline(hint);\n    }\n});\n",
+  "view": "Form"
  }
 ]

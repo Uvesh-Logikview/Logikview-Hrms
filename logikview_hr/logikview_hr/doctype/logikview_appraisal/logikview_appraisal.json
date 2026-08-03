@@ -1,0 +1,323 @@
+{
+ "actions": [],
+ "autoname": "format:APR-{YYYY}-{#####}",
+ "creation": "2026-08-03 11:38:41.574947",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sec_emp",
+  "employee",
+  "employee_name",
+  "designation",
+  "department",
+  "cb_emp",
+  "date_of_joining",
+  "anniversary_date",
+  "years_completed",
+  "assessment_type",
+  "sec_setup",
+  "reporting_officer",
+  "reporting_officer_name",
+  "cb_setup",
+  "self_assessment_date",
+  "ro_assessment_date",
+  "sec_rate",
+  "ratings",
+  "sec_narr",
+  "q_accomplishments",
+  "q_not_accomplished",
+  "q_goals",
+  "sec_dir",
+  "first_director",
+  "first_director_feedback",
+  "needs_second_director",
+  "second_director",
+  "second_director_feedback",
+  "employee_user",
+  "ro_user",
+  "first_director_user",
+  "second_director_user"
+ ],
+ "fields": [
+  {
+   "fieldname": "sec_emp",
+   "fieldtype": "Section Break",
+   "label": "Employee"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Position",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_emp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Date",
+   "label": "Date of Joining",
+   "read_only": 1
+  },
+  {
+   "fieldname": "anniversary_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Anniversary Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "years_completed",
+   "fieldtype": "Int",
+   "label": "Years Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "assessment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessment Type",
+   "options": "Technical\nGeneral",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_setup",
+   "fieldtype": "Section Break",
+   "label": "Reporting"
+  },
+  {
+   "fieldname": "reporting_officer",
+   "fieldtype": "Link",
+   "label": "Reporting Officer",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "reporting_officer.employee_name",
+   "fieldname": "reporting_officer_name",
+   "fieldtype": "Data",
+   "label": "Reporting Officer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_setup",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "self_assessment_date",
+   "fieldtype": "Date",
+   "label": "Date of Self Assessment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ro_assessment_date",
+   "fieldtype": "Date",
+   "label": "Date of RO Assessment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_rate",
+   "fieldtype": "Section Break",
+   "label": "Ratings (1 = extremely poor, 5 = phenomenal)"
+  },
+  {
+   "fieldname": "ratings",
+   "fieldtype": "Table",
+   "label": "Ratings",
+   "options": "Logikview Appraisal Rating"
+  },
+  {
+   "fieldname": "sec_narr",
+   "fieldtype": "Section Break",
+   "label": "Self-Assessment (min. 3 bullet points each)"
+  },
+  {
+   "fieldname": "q_accomplishments",
+   "fieldtype": "Text",
+   "label": "What were your most significant work-related accomplishments?"
+  },
+  {
+   "fieldname": "q_not_accomplished",
+   "fieldtype": "Text",
+   "label": "What did you NOT accomplish that you had planned? Why?"
+  },
+  {
+   "fieldname": "q_goals",
+   "fieldtype": "Text",
+   "label": "What are your goals for the next evaluation period?"
+  },
+  {
+   "fieldname": "sec_dir",
+   "fieldtype": "Section Break",
+   "label": "Director Feedback"
+  },
+  {
+   "fieldname": "first_director",
+   "fieldtype": "Link",
+   "label": "First Director",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "first_director_feedback",
+   "fieldtype": "Text",
+   "label": "First Director Feedback"
+  },
+  {
+   "default": "0",
+   "fieldname": "needs_second_director",
+   "fieldtype": "Check",
+   "label": "Needs Second Director",
+   "read_only": 1
+  },
+  {
+   "depends_on": "needs_second_director",
+   "fieldname": "second_director",
+   "fieldtype": "Link",
+   "label": "Second Director",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "depends_on": "needs_second_director",
+   "fieldname": "second_director_feedback",
+   "fieldtype": "Text",
+   "label": "Second Director Feedback"
+  },
+  {
+   "fetch_from": "employee.user_id",
+   "fieldname": "employee_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "employee_user",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "reporting_officer.user_id",
+   "fieldname": "ro_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "ro_user",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "first_director.user_id",
+   "fieldname": "first_director_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "first_director_user",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "second_director.user_id",
+   "fieldname": "second_director_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "second_director_user",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-03 11:47:27.707264",
+ "modified_by": "Administrator",
+ "module": "Logikview HR",
+ "name": "Logikview Appraisal",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
+ "track_changes": 1
+}

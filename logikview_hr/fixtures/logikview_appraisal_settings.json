@@ -1,0 +1,13 @@
+[
+ {
+  "director_one": "LOGIK-0001",
+  "director_two": "LOGIK-0002",
+  "docstatus": 0,
+  "doctype": "Logikview Appraisal Settings",
+  "general_departments": "Accounts - LA\nMarketing - LA\nSales - LA\nPurchase - LA\nOperations - LA\nProduction - LA\nDispatch - LA\nCustomer Service - LA\nHuman Resources - LA\nHR - LA\nManagement - LA\nQuality Management - LA\nLegal - LA",
+  "modified": "2026-08-03 11:40:23.475752",
+  "name": "Logikview Appraisal Settings",
+  "notify_days_before": 7,
+  "overdue_months": 4
+ }
+]

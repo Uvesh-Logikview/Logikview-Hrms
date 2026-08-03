@@ -1,0 +1,47 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-03 11:40:21.771185",
+  "name": "Pending Self-Assessment",
+  "style": "Warning",
+  "workflow_state_name": "Pending Self-Assessment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-03 11:40:22.481556",
+  "name": "Pending Manager Review",
+  "style": "Warning",
+  "workflow_state_name": "Pending Manager Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-03 11:40:22.486458",
+  "name": "Pending Director Review",
+  "style": "Primary",
+  "workflow_state_name": "Pending Director Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-03 11:40:22.490337",
+  "name": "Pending Final Director",
+  "style": "Primary",
+  "workflow_state_name": "Pending Final Director"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-03 11:40:22.492633",
+  "name": "Completed",
+  "style": "Success",
+  "workflow_state_name": "Completed"
+ }
+]

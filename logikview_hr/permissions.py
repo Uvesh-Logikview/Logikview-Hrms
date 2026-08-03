@@ -90,3 +90,30 @@ def employee_linked_has_permission(doc, ptype=None, user=None):
 	if doc.doctype in READ_ONLY_FOR_EMPLOYEE and ptype and ptype not in ("read", "select"):
 		return False
 	return doc.get("employee") in _visible_employees(user)
+
+
+# ---------------- Logikview Appraisal ----------------
+# Visible to: the employee, their reporting officer, the director(s) in the chain,
+# and HR/admin. Everyone else is filtered out.
+def appraisal_query(user):
+	user = user or frappe.session.user
+	if _has_full_access(user):
+		return ""
+	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
+	if not emp:
+		return "1=0"
+	e = frappe.db.escape(emp)
+	t = "`tabLogikview Appraisal`"
+	return (f"({t}.`employee`={e} or {t}.`reporting_officer`={e} "
+	        f"or {t}.`first_director`={e} or {t}.`second_director`={e})")
+
+
+def appraisal_has_permission(doc, ptype=None, user=None):
+	user = user or frappe.session.user
+	if _has_full_access(user):
+		return True
+	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
+	if not emp:
+		return False
+	return emp in (doc.get("employee"), doc.get("reporting_officer"),
+	               doc.get("first_director"), doc.get("second_director"))

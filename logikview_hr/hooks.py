@@ -266,8 +266,24 @@ fixtures = [
 	# "Regularization", and the late-category colour indicator on the list view.
 	{"dt": "Property Setter", "filters": [["name", "=", "Attendance Request-reason-options"]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
-	{"dt": "Client Script", "filters": [["name", "=", "Regularization Late Colours"]]},
+	{"dt": "Client Script", "filters": [["name", "in", [
+		"Regularization Late Colours",
+		"Logikview Appraisal Field Locks",
+	]]]},
 	{"dt": "Logikview Checkin Settings"},
+	# Appraisal cycle (Feature 3): workflow + its states/actions + the director
+	# routing config (single). The DocTypes themselves ship as app module JSON.
+	{"dt": "Workflow", "filters": [["name", "=", "Logikview Appraisal Workflow"]]},
+	{"dt": "Workflow State", "filters": [["name", "in", [
+		"Pending Self-Assessment", "Pending Manager Review",
+		"Pending Director Review", "Pending Final Director", "Completed",
+	]]]},
+	{"dt": "Workflow Action Master", "filters": [["name", "in", [
+		"Submit Self-Assessment", "Submit Manager Review", "Forward to Final Director",
+		"Complete Appraisal", "HR: Skip to Manager", "HR: Skip to Director",
+		"HR: Skip to Final Director", "HR: Complete",
+	]]]},
+	{"dt": "Logikview Appraisal Settings"},
 ]
 
 # Desk setup: build the Home dashboard (check-in card + Employee Details shortcuts)
@@ -285,6 +301,7 @@ permission_query_conditions = {
 	"Expense Claim": "logikview_hr.permissions.expense_claim_query",
 	"Attendance Request": "logikview_hr.permissions.attendance_request_query",
 	"Leave Allocation": "logikview_hr.permissions.leave_allocation_query",
+	"Logikview Appraisal": "logikview_hr.permissions.appraisal_query",
 }
 
 has_permission = {
@@ -295,4 +312,12 @@ has_permission = {
 	"Expense Claim": "logikview_hr.permissions.employee_linked_has_permission",
 	"Attendance Request": "logikview_hr.permissions.employee_linked_has_permission",
 	"Leave Allocation": "logikview_hr.permissions.employee_linked_has_permission",
+	"Logikview Appraisal": "logikview_hr.permissions.appraisal_has_permission",
+}
+
+scheduler_events = {
+	"daily": [
+		"logikview_hr.appraisal.create_due_appraisals",
+		"logikview_hr.appraisal.send_appraisal_reminders",
+	],
 }

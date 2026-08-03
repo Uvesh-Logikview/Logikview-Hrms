@@ -1,0 +1,58 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.523490",
+  "name": "Submit Self-Assessment",
+  "workflow_action_name": "Submit Self-Assessment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.542196",
+  "name": "Submit Manager Review",
+  "workflow_action_name": "Submit Manager Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.543738",
+  "name": "Forward to Final Director",
+  "workflow_action_name": "Forward to Final Director"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.545171",
+  "name": "Complete Appraisal",
+  "workflow_action_name": "Complete Appraisal"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.547059",
+  "name": "HR: Skip to Manager",
+  "workflow_action_name": "HR: Skip to Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.548962",
+  "name": "HR: Skip to Director",
+  "workflow_action_name": "HR: Skip to Director"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.554685",
+  "name": "HR: Skip to Final Director",
+  "workflow_action_name": "HR: Skip to Final Director"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 11:40:22.556749",
+  "name": "HR: Complete",
+  "workflow_action_name": "HR: Complete"
+ }
+]

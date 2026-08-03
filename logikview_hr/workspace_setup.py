@@ -39,6 +39,8 @@ SHORTCUTS = [
 	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Expense Claim", "label": "Expense Claim", "color": "Blue",
 	 "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Logikview Appraisal", "label": "Appraisal", "color": "Green",
+	 "doc_view": "List", "stats_filter": "[]"},
 ]
 
 

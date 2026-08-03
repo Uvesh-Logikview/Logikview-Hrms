@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-03 11:38:41.446944",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "director_one",
+  "director_two",
+  "cb1",
+  "notify_days_before",
+  "overdue_months",
+  "sb1",
+  "general_departments"
+ ],
+ "fields": [
+  {
+   "description": "This director's team routes through them first, then Director Two.",
+   "fieldname": "director_one",
+   "fieldtype": "Link",
+   "label": "Director One (2-step team)",
+   "options": "Employee"
+  },
+  {
+   "description": "Reviews last for Director One's team; sole reviewer for their own team.",
+   "fieldname": "director_two",
+   "fieldtype": "Link",
+   "label": "Director Two (final)",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "7",
+   "fieldname": "notify_days_before",
+   "fieldtype": "Int",
+   "label": "Notify Days Before Anniversary"
+  },
+  {
+   "default": "4",
+   "fieldname": "overdue_months",
+   "fieldtype": "Int",
+   "label": "Daily-Reminder After (months)"
+  },
+  {
+   "fieldname": "sb1",
+   "fieldtype": "Section Break",
+   "label": "General (non-technical) Departments"
+  },
+  {
+   "description": "Employees in these departments get the generic domain rows; everyone else gets the technical rows.",
+   "fieldname": "general_departments",
+   "fieldtype": "Small Text",
+   "label": "General Departments (one per line)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-03 11:38:41.446944",
+ "modified_by": "Administrator",
+ "module": "Logikview HR",
+ "name": "Logikview Appraisal Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
