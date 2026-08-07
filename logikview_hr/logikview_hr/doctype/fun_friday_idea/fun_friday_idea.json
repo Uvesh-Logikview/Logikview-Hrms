@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "autoname": "format:FFI-{#####}",
+ "creation": "2026-08-05 14:46:05.435685",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "idea",
+  "category",
+  "duration_minutes",
+  "cb1",
+  "status",
+  "scheduled_on",
+  "vote_count",
+  "sec_desc",
+  "description",
+  "materials",
+  "sec_meta",
+  "suggested_by",
+  "suggested_by_name",
+  "cb2",
+  "votes"
+ ],
+ "fields": [
+  {
+   "fieldname": "idea",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Idea",
+   "reqd": 1
+  },
+  {
+   "default": "Game",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Game\nTeam Building\nCreative\nFood\nOuting\nLearning\nOther"
+  },
+  {
+   "default": "60",
+   "description": "Fun Friday runs 5:00 - 6:00 PM.",
+   "fieldname": "duration_minutes",
+   "fieldtype": "Int",
+   "label": "Duration (minutes)"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Proposed",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Proposed\nShortlisted\nScheduled\nDone"
+  },
+  {
+   "depends_on": "eval:doc.status=='Scheduled' || doc.status=='Done'",
+   "fieldname": "scheduled_on",
+   "fieldtype": "Date",
+   "label": "Scheduled On (Friday)"
+  },
+  {
+   "default": "0",
+   "fieldname": "vote_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Likes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_desc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "How it works"
+  },
+  {
+   "fieldname": "materials",
+   "fieldtype": "Small Text",
+   "label": "Anything needed?"
+  },
+  {
+   "fieldname": "sec_meta",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "suggested_by",
+   "fieldtype": "Link",
+   "label": "Suggested By",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "suggested_by.employee_name",
+   "fieldname": "suggested_by_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Suggested By Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "votes",
+   "fieldtype": "Table",
+   "label": "Liked By",
+   "options": "Fun Friday Vote",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-05 14:46:05.435685",
+ "modified_by": "Administrator",
+ "module": "Logikview HR",
+ "name": "Fun Friday Idea",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "vote_count",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "idea",
+ "track_changes": 1
+}

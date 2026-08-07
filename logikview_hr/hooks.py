@@ -259,6 +259,7 @@ fixtures = [
 	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard"]]]},
 	{"dt": "Custom Field", "filters": [["name", "in", [
 		"Employee Checkin-custom_location_accuracy",
+		"Employee Checkin-custom_auto_checkout",
 		"Attendance Request-custom_late_category",
 		"Attendance Request-custom_late_by_minutes",
 	]]]},
@@ -269,7 +270,11 @@ fixtures = [
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
+		"Fun Friday Like Button",
+		"Fun Friday List Colours",
 	]]]},
+	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
+	{"dt": "Fun Friday Idea"},
 	{"dt": "Logikview Checkin Settings"},
 	# Appraisal cycle (Feature 3): workflow + its states/actions + the director
 	# routing config (single). The DocTypes themselves ship as app module JSON.

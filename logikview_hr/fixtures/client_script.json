@@ -20,5 +20,27 @@
   "name": "Logikview Appraisal Field Locks",
   "script": "\nfrappe.ui.form.on('Logikview Appraisal', {\n    refresh(frm) {\n        const me = frappe.session.user;\n        const st = frm.doc.workflow_state;\n        const isEmp = me === frm.doc.employee_user;\n        const isRO  = me === frm.doc.ro_user;\n        const isD1  = me === frm.doc.first_director_user;\n        const isD2  = me === frm.doc.second_director_user;\n        const isHR  = frappe.user.has_role('HR Manager') || frappe.user.has_role('System Manager');\n\n        const empEdit = (st === 'Pending Self-Assessment') && (isEmp || isHR);\n        const roEdit  = (st === 'Pending Manager Review')   && (isRO  || isHR);\n        const d1Edit  = (st === 'Pending Director Review')  && (isD1  || isHR);\n        const d2Edit  = (st === 'Pending Final Director')   && (isD2  || isHR);\n\n        // child-table rating columns\n        const grid = frm.fields_dict.ratings.grid;\n        grid.update_docfield_property('employee_rating', 'read_only', empEdit ? 0 : 1);\n        grid.update_docfield_property('ro_rating',       'read_only', roEdit  ? 0 : 1);\n        frm.refresh_field('ratings');\n\n        // narratives (employee)\n        ['q_accomplishments', 'q_not_accomplished', 'q_goals'].forEach(f =>\n            frm.set_df_property(f, 'read_only', empEdit ? 0 : 1));\n\n        // director feedback\n        frm.set_df_property('first_director_feedback',  'read_only', d1Edit ? 0 : 1);\n        frm.set_df_property('second_director_feedback', 'read_only', d2Edit ? 0 : 1);\n\n        // gentle hint on whose turn it is\n        const hint = {\n            'Pending Self-Assessment': 'Employee to fill the self-assessment (Your Rating + the three questions).',\n            'Pending Manager Review':  'Reporting officer to fill the RO Rating column.',\n            'Pending Director Review': 'Director to add their feedback comment.',\n            'Pending Final Director':  'Final director (Sumeet) to add closing feedback.',\n            'Completed':               'Appraisal completed.'\n        }[st];\n        if (hint) frm.dashboard.set_headline(hint);\n    }\n});\n",
   "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Fun Friday Idea",
+  "enabled": 1,
+  "modified": "2026-08-07 18:17:18.270373",
+  "module": null,
+  "name": "Fun Friday Like Button",
+  "script": "\nfrappe.ui.form.on('Fun Friday Idea', {\n    refresh(frm) {\n        if (frm.is_new()) return;\n        const me = frappe.session.user;\n        const liked = (frm.doc.votes || []).some(v => v.user === me);\n        frm.add_custom_button(liked ? '\\u2665 Liked (' + (frm.doc.vote_count || 0) + ')'\n                                    : '\\u2661 Like (' + (frm.doc.vote_count || 0) + ')', () => {\n            frappe.call({\n                method: 'logikview_hr.logikview_hr.doctype.fun_friday_idea.fun_friday_idea.toggle_like',\n                args: { idea: frm.doc.name },\n                callback: () => frm.reload_doc()\n            });\n        });\n        frm.dashboard.set_headline(\n            'Fun Friday is every Friday, 5:00 - 6:00 PM. Add your idea and like the ones you want to do!'\n        );\n    }\n});\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Fun Friday Idea",
+  "enabled": 1,
+  "modified": "2026-08-07 18:17:18.537397",
+  "module": null,
+  "name": "Fun Friday List Colours",
+  "script": "\nfrappe.listview_settings['Fun Friday Idea'] = {\n    add_fields: ['status', 'vote_count'],\n    get_indicator: function (doc) {\n        const map = { 'Proposed': 'blue', 'Shortlisted': 'orange', 'Scheduled': 'purple', 'Done': 'green' };\n        return [__(doc.status) + ' \\u00b7 \\u2665 ' + (doc.vote_count || 0),\n                map[doc.status] || 'grey', 'status,=,' + doc.status];\n    }\n};\n",
+  "view": "List"
  }
 ]

@@ -37,12 +37,38 @@ def _worked(employee, day, upto):
     return total, last_in, first_in
 
 
+def close_stale_sessions(days_back=30):
+    """Close sessions left open on PAST days (the daily sweep only handles today,
+    so a day the job didn't run would otherwise stay open forever). Counted time
+    is capped at REQUIRED_HOURS."""
+    day = today()
+    rows = frappe.db.sql("""
+        select employee, date(time) d
+        from `tabEmployee Checkin`
+        where time >= date_sub(%s, interval %s day) and date(time) < %s
+        group by employee, date(time)""", (day, days_back, day), as_dict=True)
+    for r in rows:
+        past_day = str(r.d)
+        completed, last_in, first_in = _worked(r.employee, past_day, None)
+        if not last_in:
+            continue
+        cap = max(0, REQUIRED_SECONDS - completed)
+        out_time = get_datetime(add_to_date(last_in, seconds=cap))
+        try:
+            _checkout(r.employee, past_day, out_time, first_in)
+        except Exception:
+            frappe.log_error(f"close_stale_sessions failed for {r.employee} {past_day}",
+                             "Logikview Auto Checkout")
+
+
 def auto_checkout():
     now = now_datetime()
     if (now.hour, now.minute) < AUTO_AFTER:
         return
     day = today()
     final_sweep = (now.hour, now.minute) >= FINAL_SWEEP
+    if final_sweep:
+        close_stale_sessions()
 
     employees = frappe.get_all("Employee Checkin", filters={"time": [">=", day]},
                                pluck="employee", group_by="employee")
@@ -89,6 +115,7 @@ def _checkout(employee, day, out_time, first_in):
     checkin = frappe.get_doc({
         "doctype": "Employee Checkin", "employee": employee, "log_type": "OUT",
         "time": out_time, "device_id": DEVICE_TAG,
+        "custom_auto_checkout": 1,
         "latitude": lat, "longitude": lon, "geolocation": geojson, "shift": shift,
     })
     checkin.flags.ignore_permissions = True
