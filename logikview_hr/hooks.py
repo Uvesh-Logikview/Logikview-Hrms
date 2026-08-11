@@ -271,6 +271,10 @@ fixtures = [
 		"Employee-gender-link_filters",
 		"Employee-salutation-link_filters",
 		"Attendance Request-custom_late_category-in_standard_filter",
+		"Attendance Request-custom_late_category-in_list_view",
+		"Attendance Request-custom_late_by_minutes-in_list_view",
+		"Attendance Request-custom_late_by_minutes-label",
+		"Attendance Request-to_date-in_list_view",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
