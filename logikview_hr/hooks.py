@@ -265,13 +265,18 @@ fixtures = [
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.
-	{"dt": "Property Setter", "filters": [["name", "=", "Attendance Request-reason-options"]]},
+	{"dt": "Property Setter", "filters": [["name", "in", [
+		"Attendance Request-reason-options",
+		"Employee-gender-link_filters",
+		"Employee-salutation-link_filters",
+	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
 		"Fun Friday Like Button",
 		"Fun Friday List Colours",
+		"Employee Approver Pickers",
 	]]]},
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},

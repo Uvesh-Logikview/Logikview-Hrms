@@ -14,5 +14,37 @@
   "property_type": "Text",
   "row_name": null,
   "value": "Work From Home\nOn Duty\nLate Arrival"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Employee",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "gender",
+  "is_system_generated": 1,
+  "modified": "2026-08-11 11:53:13.392966",
+  "module": null,
+  "name": "Employee-gender-link_filters",
+  "property": "link_filters",
+  "property_type": "JSON",
+  "row_name": null,
+  "value": "[[\"Gender\", \"name\", \"in\", [\"Male\", \"Female\", \"Other\"]]]"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Employee",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "salutation",
+  "is_system_generated": 1,
+  "modified": "2026-08-11 11:53:14.486126",
+  "module": null,
+  "name": "Employee-salutation-link_filters",
+  "property": "link_filters",
+  "property_type": "JSON",
+  "row_name": null,
+  "value": "[[\"Salutation\", \"name\", \"in\", [\"Mr\", \"Mrs\", \"Miss\", \"Ms\", \"Dr\"]]]"
  }
 ]
