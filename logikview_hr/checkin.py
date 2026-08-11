@@ -21,8 +21,12 @@ DEVICE_TAG = "Auto Checkout"
 def _worked(employee, day, upto):
     """Return (completed_seconds, last_in_time, first_in_time) for the day.
     completed_seconds counts only closed IN->OUT pairs (open segment excluded)."""
+    # bound to THIS day only - an open-ended ">= day" pulls in later days' logs,
+    # which mixes sessions together (wrong hours, and last_in ends up None so the
+    # open session is never closed)
     logs = frappe.get_all("Employee Checkin",
-                          filters={"employee": employee, "time": [">=", day]},
+                          filters={"employee": employee,
+                                   "time": ["between", [day + " 00:00:00", day + " 23:59:59"]]},
                           fields=["log_type", "time"], order_by="time asc")
     total, last_in, first_in = 0, None, None
     for l in logs:
@@ -54,6 +58,10 @@ def close_stale_sessions(days_back=30):
             continue
         cap = max(0, REQUIRED_SECONDS - completed)
         out_time = get_datetime(add_to_date(last_in, seconds=cap))
+        # never let the auto check-out cross midnight into the next day
+        end_of_day = get_datetime(past_day + " 23:59:00")
+        if out_time > end_of_day:
+            out_time = end_of_day
         try:
             _checkout(r.employee, past_day, out_time, first_in)
         except Exception:
@@ -122,7 +130,9 @@ def _checkout(employee, day, out_time, first_in):
     checkin.insert(ignore_permissions=True)
 
     # ---- finalize attendance (same rules as the manual check-out) ----
-    logs = frappe.get_all("Employee Checkin", filters={"employee": employee, "time": [">=", day]},
+    logs = frappe.get_all("Employee Checkin",
+                          filters={"employee": employee,
+                                   "time": ["between", [day + " 00:00:00", day + " 23:59:59"]]},
                           fields=["log_type", "time"], order_by="time asc")
     total_seconds, last_in = 0, None
     for l in logs:
