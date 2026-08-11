@@ -262,6 +262,7 @@ fixtures = [
 		"Employee Checkin-custom_auto_checkout",
 		"Attendance Request-custom_late_category",
 		"Attendance Request-custom_late_by_minutes",
+		"Attendance Request-custom_hr_warning",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.
@@ -269,6 +270,7 @@ fixtures = [
 		"Attendance Request-reason-options",
 		"Employee-gender-link_filters",
 		"Employee-salutation-link_filters",
+		"Attendance Request-custom_late_category-in_standard_filter",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
@@ -342,5 +344,10 @@ doc_events = {
 	"Logikview Appraisal": {
 		# notify the in-the-loop (CC) director whenever the appraisal advances a stage
 		"on_update": "logikview_hr.appraisal.on_appraisal_update",
+	},
+	"Attendance Request": {
+		# tell the employee when HR leaves a warning/note on their regularization
+		"on_update": "logikview_hr.regularization.notify_warning",
+		"on_submit": "logikview_hr.regularization.notify_warning",
 	},
 }

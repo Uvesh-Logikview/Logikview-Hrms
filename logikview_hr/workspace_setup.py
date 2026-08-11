@@ -141,6 +141,28 @@ def _lock_readonly_doctypes():
 	frappe.db.commit()
 
 
+def _setup_regularization_perms():
+	"""HR's warning note on a Regularization sits at permlevel 1: HR/admin write it,
+	the employee can only read it (Frappe silently drops writes to a permlevel the
+	user lacks)."""
+	from frappe.permissions import add_permission, update_permission_property
+	dt = "Attendance Request"
+	for role in ("HR Manager", "HR User", "System Manager"):
+		try:
+			add_permission(dt, role, 1)
+			update_permission_property(dt, role, 1, "read", 1, validate=False)
+			update_permission_property(dt, role, 1, "write", 1, validate=False)
+		except Exception:
+			pass
+	try:
+		add_permission(dt, "Employee", 1)
+		update_permission_property(dt, "Employee", 1, "read", 1, validate=False)
+		update_permission_property(dt, "Employee", 1, "write", 0, validate=False)
+	except Exception:
+		pass
+	frappe.db.commit()
+
+
 def setup_desk():
 	"""Idempotent; wired to after_install and after_migrate so a migrate that
 	re-syncs the standard Home from ERPNext source can't undo our layout."""
@@ -153,6 +175,7 @@ def setup_desk():
 		_apply_visibility()
 		_remove_my_attendance()
 		_lock_readonly_doctypes()
+		_setup_regularization_perms()
 	finally:
 		frappe.conf.developer_mode = orig_dev
 	frappe.db.commit()

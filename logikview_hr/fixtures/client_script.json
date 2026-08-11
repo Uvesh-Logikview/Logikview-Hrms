@@ -4,10 +4,10 @@
   "doctype": "Client Script",
   "dt": "Attendance Request",
   "enabled": 1,
-  "modified": "2026-07-31 11:12:32.650895",
+  "modified": "2026-08-11 12:04:44.691899",
   "module": null,
   "name": "Regularization Late Colours",
-  "script": "frappe.listview_settings['Attendance Request'] = {\n    get_indicator: function (doc) {\n        const map = {\n            'Late \\u226415 min': 'yellow',\n            'Late 15-30 min': 'orange',\n            'Late 30-60 min': 'purple',\n            'Late 1-2 hr': 'pink',\n            'Late >2 hr': 'red'\n        };\n        if (doc.custom_late_category && map[doc.custom_late_category]) {\n            return [__(doc.custom_late_category), map[doc.custom_late_category], 'custom_late_category,=,' + doc.custom_late_category];\n        }\n        if (doc.docstatus === 1) return [__('Approved'), 'green', 'docstatus,=,1'];\n        return [__('Pending'), 'grey', 'docstatus,=,0'];\n    }\n};",
+  "script": "frappe.listview_settings['Attendance Request'] = {\n    add_fields: ['custom_late_category', 'custom_late_by_minutes', 'docstatus', 'reason'],\n    get_indicator: function (doc) {\n        const map = {\n            'Late \\u226415 min': 'yellow',\n            'Late 15-30 min': 'orange',\n            'Late 30-60 min': 'purple',\n            'Late 1-2 hr': 'pink',\n            'Late >2 hr': 'red'\n        };\n        if (doc.custom_late_category && map[doc.custom_late_category]) {\n            // show the category on drafts too, with the approval state alongside,\n            // so HR can scan and filter before submitting in bulk\n            const state = doc.docstatus === 1 ? ' \\u2713' : (doc.docstatus === 2 ? ' \\u2717' : ' \\u00b7 to approve');\n            return [__(doc.custom_late_category) + state,\n                    map[doc.custom_late_category],\n                    'custom_late_category,=,' + doc.custom_late_category];\n        }\n        if (doc.docstatus === 1) return [__('Approved'), 'green', 'docstatus,=,1'];\n        if (doc.docstatus === 2) return [__('Rejected'), 'red', 'docstatus,=,2'];\n        return [__('Draft'), 'grey', 'docstatus,=,0'];\n    }\n};",
   "view": "List"
  },
  {
