@@ -104,6 +104,40 @@ def _notify(users, subject, message, appraisal_name, dedup_key):
         }).insert(ignore_permissions=True)
 
 
+# ---------------------------------------------------------------- routing
+@frappe.whitelist()
+def resolve_defaults(employee):
+    """Everything that depends on who the employee is: which form they get and
+    who reviews it. Shared by the scheduler and by a hand-created appraisal, so
+    a manual one routes exactly like an auto-generated one."""
+    s = _settings()
+    d_one, d_two = s.director_one, s.director_two
+    emp = frappe.db.get_value("Employee", employee,
+                              ["department", "reports_to", "employee_name"], as_dict=True)
+    if not emp:
+        return {}
+
+    assessment_type = "General" if emp.department in _general_departments(s) else "Technical"
+    first_director, needs_second, second_director = _top_director(employee, d_one, d_two)
+
+    # keep-in-loop (CC) director: notified but not a reviewer (e.g. Pranjal for the
+    # Frappe team, which reports up to Sumeet). Skip if he's already in the chain.
+    loop_depts = {d.strip() for d in (s.loop_departments or "").splitlines() if d.strip()}
+    cc_director = s.loop_director if (emp.department in loop_depts and s.loop_director) else None
+    if cc_director in (first_director, second_director):
+        cc_director = None
+
+    return {
+        "assessment_type": assessment_type,
+        "reporting_officer": emp.reports_to,
+        "first_director": first_director,
+        "needs_second_director": needs_second,
+        "second_director": second_director,
+        "cc_director": cc_director,
+        "ratings": _rating_rows(assessment_type),
+    }
+
+
 # ---------------------------------------------------------------- creation
 def create_appraisal(employee, anniversary_date, years):
     s = _settings()
@@ -116,29 +150,16 @@ def create_appraisal(employee, anniversary_date, years):
     if employee in (d_one, d_two) or not emp.reports_to:
         return None
 
-    assessment_type = "General" if emp.department in _general_departments(s) else "Technical"
-    first_director, needs_second, second_director = _top_director(employee, d_one, d_two)
-
-    # keep-in-loop (CC) director: notified but not a reviewer (e.g. Pranjal for the
-    # Frappe team, which reports up to Sumeet). Skip if he's already in the chain.
-    loop_depts = {d.strip() for d in (s.loop_departments or "").splitlines() if d.strip()}
-    cc_director = s.loop_director if (emp.department in loop_depts and s.loop_director) else None
-    if cc_director in (first_director, second_director):
-        cc_director = None
+    d = resolve_defaults(employee)
+    cc_director = d.get("cc_director")
 
     doc = frappe.get_doc({
         "doctype": "Logikview Appraisal",
         "employee": employee,
         "anniversary_date": anniversary_date,
         "years_completed": years,
-        "assessment_type": assessment_type,
-        "reporting_officer": emp.reports_to,
-        "first_director": first_director,
-        "needs_second_director": needs_second,
-        "second_director": second_director,
-        "cc_director": cc_director,
         "workflow_state": "Pending Self-Assessment",
-        "ratings": _rating_rows(assessment_type),
+        **d,
     })
     doc.flags.ignore_permissions = True
     doc.insert(ignore_permissions=True)
