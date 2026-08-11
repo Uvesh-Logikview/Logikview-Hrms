@@ -69,6 +69,35 @@ def close_stale_sessions(days_back=30):
                              "Logikview Auto Checkout")
 
 
+def backfill_attendance(days_back=30):
+    """Create/refresh Attendance for past days that have check-ins but no
+    Attendance record (e.g. a day closed by an out-of-band OUT), so worked hours
+    are never left missing or at 0."""
+    day = today()
+    rows = frappe.db.sql("""
+        select employee, date(time) d
+        from `tabEmployee Checkin`
+        where time >= date_sub(%s, interval %s day) and date(time) < %s
+        group by employee, date(time)""", (day, days_back, day), as_dict=True)
+    made = 0
+    for r in rows:
+        past_day = str(r.d)
+        if frappe.db.exists("Attendance", {"employee": r.employee, "attendance_date": past_day,
+                                           "docstatus": ["!=", 2]}):
+            continue
+        completed, last_in, first_in = _worked(r.employee, past_day, None)
+        if last_in or not completed:
+            continue  # still open (the sweep handles it) or nothing worked
+        try:
+            _write_attendance(r.employee, past_day, completed, first_in,
+                              get_datetime(past_day + " 00:00:00"))
+            made += 1
+        except Exception:
+            frappe.log_error(f"backfill_attendance failed for {r.employee} {past_day}",
+                             "Logikview Auto Checkout")
+    return made
+
+
 def auto_checkout():
     now = now_datetime()
     if (now.hour, now.minute) < AUTO_AFTER:
@@ -77,6 +106,7 @@ def auto_checkout():
     final_sweep = (now.hour, now.minute) >= FINAL_SWEEP
     if final_sweep:
         close_stale_sessions()
+        backfill_attendance()
 
     employees = frappe.get_all("Employee Checkin", filters={"time": [">=", day]},
                                pluck="employee", group_by="employee")
@@ -130,18 +160,20 @@ def _checkout(employee, day, out_time, first_in):
     checkin.insert(ignore_permissions=True)
 
     # ---- finalize attendance (same rules as the manual check-out) ----
-    logs = frappe.get_all("Employee Checkin",
-                          filters={"employee": employee,
-                                   "time": ["between", [day + " 00:00:00", day + " 23:59:59"]]},
-                          fields=["log_type", "time"], order_by="time asc")
-    total_seconds, last_in = 0, None
-    for l in logs:
-        t = get_datetime(l.time)
-        if l.log_type == "IN":
-            last_in = t
-        elif l.log_type == "OUT" and last_in:
-            total_seconds += (t - last_in).total_seconds()
-            last_in = None
+    total_seconds, _open, _first = _worked(employee, day, None)
+    _write_attendance(employee, day, total_seconds, first_in, out_time, shift)
+
+
+def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=None):
+    """Create or refresh the day's Attendance from the worked seconds."""
+    if shift is None:
+        shift = frappe.db.get_value("Shift Assignment",
+                                    {"employee": employee, "status": "Active",
+                                     "start_date": ["<=", day], "end_date": [">=", day]}, "shift_type")
+        if not shift:
+            shift = frappe.db.get_value("Shift Assignment",
+                                        {"employee": employee, "status": "Active",
+                                         "start_date": ["<=", day], "end_date": ["in", ["", None]]}, "shift_type")
     working_hours = round(total_seconds / 3600, 4)
 
     late_entry, early_exit, half_day_threshold = 0, 0, 0
