@@ -263,6 +263,10 @@ fixtures = [
 		"Attendance Request-custom_late_category",
 		"Attendance Request-custom_late_by_minutes",
 		"Attendance Request-custom_hr_warning",
+		"Employee-custom_last_seen_location",
+		"Employee-custom_last_seen_latitude",
+		"Employee-custom_last_seen_longitude",
+		"Employee-custom_last_seen_at",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.

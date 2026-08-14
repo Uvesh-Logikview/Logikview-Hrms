@@ -18,6 +18,60 @@ FINAL_SWEEP = (23, 30)     # after this, close anything still open (capped)
 DEVICE_TAG = "Auto Checkout"
 
 
+def classify_location(latitude, longitude):
+	"""Office vs Work From Home, using the same radius rule as a manual check-in."""
+	s = frappe.get_cached_doc("Logikview Checkin Settings")
+	distance_km = (((float(latitude) - float(s.latitude)) ** 2
+	                + (float(longitude) - float(s.longitude)) ** 2) ** 0.5) * 111
+	return "Office" if distance_km <= float(s.radius_km) else "Work From Home"
+
+
+@frappe.whitelist()
+def ping_location(latitude, longitude, accuracy=None):
+	"""Called periodically by the check-in card while the person is checked in, so
+	an auto check-out can be tagged with where they actually were - the job runs
+	on the server hours later, when there is no browser left to ask for GPS."""
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+	if not employee or not latitude or not longitude:
+		return {}
+
+	location = classify_location(latitude, longitude)
+	frappe.db.set_value("Employee", employee, {
+		"custom_last_seen_location": location,
+		"custom_last_seen_latitude": float(latitude),
+		"custom_last_seen_longitude": float(longitude),
+		"custom_last_seen_at": now_datetime(),
+	}, update_modified=False)
+	frappe.db.commit()
+	return {"location": location}
+
+
+def _last_known_location(employee, day):
+	"""Where the person was most recently seen today (GPS ping), else where they
+	checked in from. Returns (location, lat, lon, geojson) or None."""
+	emp = frappe.db.get_value("Employee", employee,
+	                          ["custom_last_seen_location", "custom_last_seen_latitude",
+	                           "custom_last_seen_longitude", "custom_last_seen_at"], as_dict=True)
+	if emp and emp.custom_last_seen_at and emp.custom_last_seen_location:
+		if str(emp.custom_last_seen_at)[:10] == day:      # only trust today's ping
+			lat, lon = emp.custom_last_seen_latitude, emp.custom_last_seen_longitude
+			geojson = ('{"type": "FeatureCollection", "features": [{"type": "Feature", '
+			           '"properties": {}, "geometry": {"type": "Point", "coordinates": ['
+			           + str(lon) + ', ' + str(lat) + ']}}]}')
+			return emp.custom_last_seen_location, lat, lon, geojson
+
+	last_in = frappe.db.sql("""
+		select device_id, latitude, longitude, geolocation
+		from `tabEmployee Checkin`
+		where employee = %s and log_type = 'IN' and time between %s and %s
+		order by time desc limit 1""",
+		(employee, day + " 00:00:00", day + " 23:59:59"), as_dict=True)
+	if last_in:
+		return (last_in[0].device_id or "Office", last_in[0].latitude,
+		        last_in[0].longitude, last_in[0].geolocation)
+	return None
+
+
 def _worked(employee, day, upto):
     """Return (completed_seconds, last_in_time, first_in_time) for the day.
     completed_seconds counts only closed IN->OUT pairs (open segment excluded)."""
@@ -135,23 +189,15 @@ def auto_checkout():
 
 
 def _checkout(employee, day, out_time, first_in):
-    # Carry over the location the person actually worked from: an auto check-out
-    # has no live GPS, so inherit the day's last IN (Office / Work From Home) -
-    # tagging it "Auto Checkout" would throw that information away. The
-    # custom_auto_checkout flag is what marks it as system-generated.
-    last_in = frappe.db.sql("""
-        select device_id, latitude, longitude, geolocation
-        from `tabEmployee Checkin`
-        where employee = %s and log_type = 'IN' and time between %s and %s
-        order by time desc limit 1""",
-        (employee, day + " 00:00:00", day + " 23:59:59"), as_dict=True)
-
+    # Tag the auto check-out with where the person actually was: the most recent
+    # GPS ping sent by their check-in card today, falling back to where they
+    # checked in from. custom_auto_checkout is what marks it system-generated.
     settings = frappe.get_cached_doc("Logikview Checkin Settings")
-    if last_in:
-        location = last_in[0].device_id or "Office"
-        lat = last_in[0].latitude or settings.latitude
-        lon = last_in[0].longitude or settings.longitude
-        geojson = last_in[0].geolocation
+    known = _last_known_location(employee, day)
+    if known:
+        location, lat, lon, geojson = known
+        lat = lat or settings.latitude
+        lon = lon or settings.longitude
     else:
         location, lat, lon, geojson = "Office", settings.latitude, settings.longitude, None
     if not geojson:
