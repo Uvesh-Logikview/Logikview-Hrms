@@ -275,6 +275,11 @@ fixtures = [
 		"Attendance Request-custom_late_by_minutes-in_list_view",
 		"Attendance Request-custom_late_by_minutes-label",
 		"Attendance Request-to_date-in_list_view",
+		"Employee Checkin-device_id-in_list_view",
+		"Employee Checkin-device_id-label",
+		"Employee Checkin-device_id-in_standard_filter",
+		"Employee Checkin-custom_auto_checkout-in_list_view",
+		"Employee Checkin-custom_auto_checkout-in_standard_filter",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
@@ -283,6 +288,7 @@ fixtures = [
 		"Fun Friday Like Button",
 		"Fun Friday List Colours",
 		"Employee Approver Pickers",
+		"Employee Checkin Location",
 	]]]},
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},

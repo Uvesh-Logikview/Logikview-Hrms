@@ -53,5 +53,16 @@
   "name": "Employee Approver Pickers",
   "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // the stock pickers list every user in the system - restrict them to the\n        // people who are actually authorised to approve\n        const approver_query = { query: 'logikview_hr.queries.approver_query' };\n        ['expense_approver', 'leave_approver', 'shift_request_approver'].forEach(f => {\n            if (frm.fields_dict[f]) frm.set_query(f, () => approver_query);\n        });\n    }\n});\n",
   "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Employee Checkin",
+  "enabled": 1,
+  "modified": "2026-08-14 16:26:50.509248",
+  "module": null,
+  "name": "Employee Checkin Location",
+  "script": "frappe.listview_settings['Employee Checkin'] = {\n    add_fields: ['device_id', 'custom_auto_checkout', 'log_type'],\n\n    get_indicator: function (doc) {\n        if (doc.log_type === 'IN')  return [__('IN'),  'green',  'log_type,=,IN'];\n        if (doc.log_type === 'OUT') return [__('OUT'), 'orange', 'log_type,=,OUT'];\n        return [__(doc.log_type || ''), 'grey', ''];\n    },\n\n    formatters: {\n        // where the person actually was, from the device GPS at check-in\n        device_id: function (value, df, doc) {\n            if (!value) return '';\n            var wfh = String(value).toLowerCase().indexOf('home') !== -1;\n            var office = String(value).toLowerCase().indexOf('office') !== -1;\n            var label = wfh ? 'WFH' : (office ? 'OFC' : value);\n            var bg = wfh ? '#e8f1ff' : (office ? '#e7f7ee' : '#f2f4f6');\n            var fg = wfh ? '#1263d1' : (office ? '#17794f' : '#5a6b78');\n            var pill = '<span style=\"background:' + bg + ';color:' + fg +\n                       ';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;\">' +\n                       label + '</span>';\n            if (doc && doc.custom_auto_checkout) {\n                pill += ' <span title=\"Checked out automatically by the system\" ' +\n                        'style=\"color:#8a94a0;font-size:11px;\">auto</span>';\n            }\n            return pill;\n        },\n        custom_auto_checkout: function (value) {\n            return value\n                ? '<span style=\"color:#8a94a0;font-weight:600;\">\\u2713 Auto</span>'\n                : '';\n        }\n    }\n};",
+  "view": "List"
  }
 ]

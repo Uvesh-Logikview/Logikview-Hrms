@@ -135,12 +135,29 @@ def auto_checkout():
 
 
 def _checkout(employee, day, out_time, first_in):
+    # Carry over the location the person actually worked from: an auto check-out
+    # has no live GPS, so inherit the day's last IN (Office / Work From Home) -
+    # tagging it "Auto Checkout" would throw that information away. The
+    # custom_auto_checkout flag is what marks it as system-generated.
+    last_in = frappe.db.sql("""
+        select device_id, latitude, longitude, geolocation
+        from `tabEmployee Checkin`
+        where employee = %s and log_type = 'IN' and time between %s and %s
+        order by time desc limit 1""",
+        (employee, day + " 00:00:00", day + " 23:59:59"), as_dict=True)
+
     settings = frappe.get_cached_doc("Logikview Checkin Settings")
-    lat = settings.latitude
-    lon = settings.longitude
-    geojson = ('{"type": "FeatureCollection", "features": [{"type": "Feature", '
-               '"properties": {}, "geometry": {"type": "Point", "coordinates": ['
-               + str(lon) + ', ' + str(lat) + ']}}]}')
+    if last_in:
+        location = last_in[0].device_id or "Office"
+        lat = last_in[0].latitude or settings.latitude
+        lon = last_in[0].longitude or settings.longitude
+        geojson = last_in[0].geolocation
+    else:
+        location, lat, lon, geojson = "Office", settings.latitude, settings.longitude, None
+    if not geojson:
+        geojson = ('{"type": "FeatureCollection", "features": [{"type": "Feature", '
+                   '"properties": {}, "geometry": {"type": "Point", "coordinates": ['
+                   + str(lon) + ', ' + str(lat) + ']}}]}')
 
     shift = frappe.db.get_value("Shift Assignment",
                                 {"employee": employee, "status": "Active",
@@ -152,7 +169,7 @@ def _checkout(employee, day, out_time, first_in):
 
     checkin = frappe.get_doc({
         "doctype": "Employee Checkin", "employee": employee, "log_type": "OUT",
-        "time": out_time, "device_id": DEVICE_TAG,
+        "time": out_time, "device_id": location,
         "custom_auto_checkout": 1,
         "latitude": lat, "longitude": lon, "geolocation": geojson, "shift": shift,
     })
