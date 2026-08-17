@@ -1,11 +1,10 @@
-"""Auto check-out for employees who forget to check out.
+"""Attendance hours for days the employee did not close themselves.
 
-Rule (per Logikview): people may check out themselves any time. If they're still
-checked in and have completed the full day (>= REQUIRED_HOURS of worked time), the
-system checks them out automatically — but never before 19:15, so anyone who
-extends past the 19:00 shift end still gets credited up to when they hit their
-hours. A late-night safety sweep closes any session left open, capping the counted
-time at REQUIRED_HOURS so a forgotten check-out can't run up the clock overnight.
+Checking out is manual - the system never creates a check-out record. If someone
+has not checked out by the evening, we only write the day's worked hours to
+Attendance (counted to the 19:15 cut-off and capped at a full day) so the day is
+never left at 0, and the session stays open. When they do check out, the check-in
+script recomputes the real hours and clears the auto-filled flag.
 """
 
 import frappe
@@ -13,63 +12,9 @@ from frappe.utils import today, now_datetime, get_datetime, add_to_date
 
 REQUIRED_HOURS = 9
 REQUIRED_SECONDS = REQUIRED_HOURS * 3600
-AUTO_AFTER = (19, 15)      # don't auto-checkout before 19:15
-FINAL_SWEEP = (23, 30)     # after this, close anything still open (capped)
-DEVICE_TAG = "Auto Checkout"
-
-
-def classify_location(latitude, longitude):
-	"""Office vs Work From Home, using the same radius rule as a manual check-in."""
-	s = frappe.get_cached_doc("Logikview Checkin Settings")
-	distance_km = (((float(latitude) - float(s.latitude)) ** 2
-	                + (float(longitude) - float(s.longitude)) ** 2) ** 0.5) * 111
-	return "Office" if distance_km <= float(s.radius_km) else "Work From Home"
-
-
-@frappe.whitelist()
-def ping_location(latitude, longitude, accuracy=None):
-	"""Called periodically by the check-in card while the person is checked in, so
-	an auto check-out can be tagged with where they actually were - the job runs
-	on the server hours later, when there is no browser left to ask for GPS."""
-	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-	if not employee or not latitude or not longitude:
-		return {}
-
-	location = classify_location(latitude, longitude)
-	frappe.db.set_value("Employee", employee, {
-		"custom_last_seen_location": location,
-		"custom_last_seen_latitude": float(latitude),
-		"custom_last_seen_longitude": float(longitude),
-		"custom_last_seen_at": now_datetime(),
-	}, update_modified=False)
-	frappe.db.commit()
-	return {"location": location}
-
-
-def _last_known_location(employee, day):
-	"""Where the person was most recently seen today (GPS ping), else where they
-	checked in from. Returns (location, lat, lon, geojson) or None."""
-	emp = frappe.db.get_value("Employee", employee,
-	                          ["custom_last_seen_location", "custom_last_seen_latitude",
-	                           "custom_last_seen_longitude", "custom_last_seen_at"], as_dict=True)
-	if emp and emp.custom_last_seen_at and emp.custom_last_seen_location:
-		if str(emp.custom_last_seen_at)[:10] == day:      # only trust today's ping
-			lat, lon = emp.custom_last_seen_latitude, emp.custom_last_seen_longitude
-			geojson = ('{"type": "FeatureCollection", "features": [{"type": "Feature", '
-			           '"properties": {}, "geometry": {"type": "Point", "coordinates": ['
-			           + str(lon) + ', ' + str(lat) + ']}}]}')
-			return emp.custom_last_seen_location, lat, lon, geojson
-
-	last_in = frappe.db.sql("""
-		select device_id, latitude, longitude, geolocation
-		from `tabEmployee Checkin`
-		where employee = %s and log_type = 'IN' and time between %s and %s
-		order by time desc limit 1""",
-		(employee, day + " 00:00:00", day + " 23:59:59"), as_dict=True)
-	if last_in:
-		return (last_in[0].device_id or "Office", last_in[0].latitude,
-		        last_in[0].longitude, last_in[0].geolocation)
-	return None
+AUTO_AFTER = (19, 15)      # don't fill hours before this (people extend past 19:00)
+FINAL_SWEEP = (23, 30)     # last run of the night
+CUTOFF_TIME = "19:15:00"   # hours for a day with no check-out are counted to here
 
 
 def _worked(employee, day, upto):
@@ -95,38 +40,46 @@ def _worked(employee, day, upto):
     return total, last_in, first_in
 
 
-def close_stale_sessions(days_back=30):
-    """Close sessions left open on PAST days (the daily sweep only handles today,
-    so a day the job didn't run would otherwise stay open forever). Counted time
-    is capped at REQUIRED_HOURS."""
+def fill_open_day_hours(days_back=30):
+    """Days where the person never checked out: record the hours so attendance is
+    not left at 0, but leave the session OPEN and create no check-out record - only
+    the employee closes their own day. If they do check out later, the check-in
+    script recomputes the real hours and clears the auto-filled flag."""
     day = today()
     rows = frappe.db.sql("""
         select employee, date(time) d
         from `tabEmployee Checkin`
-        where time >= date_sub(%s, interval %s day) and date(time) < %s
+        where time >= date_sub(%s, interval %s day) and date(time) <= %s
         group by employee, date(time)""", (day, days_back, day), as_dict=True)
+    filled = 0
     for r in rows:
         past_day = str(r.d)
         completed, last_in, first_in = _worked(r.employee, past_day, None)
         if not last_in:
+            continue                       # properly checked out - nothing to do
+        if past_day == day and (now_datetime().hour, now_datetime().minute) < AUTO_AFTER:
+            continue                       # today, too early - let them check out
+        # same figure the auto check-out used to produce: worked time up to the
+        # cut-off, capped at a full day so a forgotten check-out can't inflate it
+        cutoff = min(get_datetime(past_day + " " + CUTOFF_TIME), now_datetime()) \
+            if past_day == day else get_datetime(past_day + " " + CUTOFF_TIME)
+        open_secs = max(0, (cutoff - last_in).total_seconds())
+        total = min(completed + open_secs, REQUIRED_SECONDS)
+        if total <= 0:
             continue
-        cap = max(0, REQUIRED_SECONDS - completed)
-        out_time = get_datetime(add_to_date(last_in, seconds=cap))
-        # never let the auto check-out cross midnight into the next day
-        end_of_day = get_datetime(past_day + " 23:59:00")
-        if out_time > end_of_day:
-            out_time = end_of_day
         try:
-            _checkout(r.employee, past_day, out_time, first_in)
+            _write_attendance(r.employee, past_day, total, first_in,
+                              get_datetime(past_day + " " + CUTOFF_TIME), auto_filled=1)
+            filled += 1
         except Exception:
-            frappe.log_error(f"close_stale_sessions failed for {r.employee} {past_day}",
-                             "Logikview Auto Checkout")
+            frappe.log_error(f"fill_open_day_hours failed for {r.employee} {past_day}",
+                             "Logikview Attendance Fill")
+    return filled
 
 
 def backfill_attendance(days_back=30):
-    """Create/refresh Attendance for past days that have check-ins but no
-    Attendance record (e.g. a day closed by an out-of-band OUT), so worked hours
-    are never left missing or at 0."""
+    """Create/refresh Attendance for past days that have check-ins, are already
+    closed, but have no Attendance record - so worked hours are never missing."""
     day = today()
     rows = frappe.db.sql("""
         select employee, date(time) d
@@ -141,93 +94,30 @@ def backfill_attendance(days_back=30):
             continue
         completed, last_in, first_in = _worked(r.employee, past_day, None)
         if last_in or not completed:
-            continue  # still open (the sweep handles it) or nothing worked
+            continue  # still open (fill_open_day_hours handles it) or nothing worked
         try:
             _write_attendance(r.employee, past_day, completed, first_in,
                               get_datetime(past_day + " 00:00:00"))
             made += 1
         except Exception:
             frappe.log_error(f"backfill_attendance failed for {r.employee} {past_day}",
-                             "Logikview Auto Checkout")
+                             "Logikview Attendance Fill")
     return made
 
 
 def auto_checkout():
+    """Evening job. Despite the name it no longer checks anybody out - it only
+    fills in the hours for people who haven't checked out yet."""
     now = now_datetime()
     if (now.hour, now.minute) < AUTO_AFTER:
         return
-    day = today()
-    final_sweep = (now.hour, now.minute) >= FINAL_SWEEP
-    if final_sweep:
-        close_stale_sessions()
+    fill_open_day_hours()
+    if (now.hour, now.minute) >= FINAL_SWEEP:
         backfill_attendance()
 
-    employees = frappe.get_all("Employee Checkin", filters={"time": [">=", day]},
-                               pluck="employee", group_by="employee")
-    for emp in employees:
-        completed, last_in, first_in = _worked(emp, day, now)
-        if not last_in:
-            continue  # already checked out
-        open_secs = (now - last_in).total_seconds()
-        total_now = completed + open_secs
 
-        if total_now >= REQUIRED_SECONDS:
-            out_time = now                                   # full credit for extenders
-        elif final_sweep:
-            # forgot to check out and under the day's hours: cap total at REQUIRED
-            cap = max(0, REQUIRED_SECONDS - completed)
-            out_time = add_to_date(last_in, seconds=cap)
-            if get_datetime(out_time) > now:
-                out_time = now
-        else:
-            continue  # still under hours, before the final sweep -> let them check out
-
-        try:
-            _checkout(emp, day, get_datetime(out_time), first_in)
-        except Exception:
-            frappe.log_error(f"auto_checkout failed for {emp}", "Logikview Auto Checkout")
-
-
-def _checkout(employee, day, out_time, first_in):
-    # Tag the auto check-out with where the person actually was: the most recent
-    # GPS ping sent by their check-in card today, falling back to where they
-    # checked in from. custom_auto_checkout is what marks it system-generated.
-    settings = frappe.get_cached_doc("Logikview Checkin Settings")
-    known = _last_known_location(employee, day)
-    if known:
-        location, lat, lon, geojson = known
-        lat = lat or settings.latitude
-        lon = lon or settings.longitude
-    else:
-        location, lat, lon, geojson = "Office", settings.latitude, settings.longitude, None
-    if not geojson:
-        geojson = ('{"type": "FeatureCollection", "features": [{"type": "Feature", '
-                   '"properties": {}, "geometry": {"type": "Point", "coordinates": ['
-                   + str(lon) + ', ' + str(lat) + ']}}]}')
-
-    shift = frappe.db.get_value("Shift Assignment",
-                                {"employee": employee, "status": "Active",
-                                 "start_date": ["<=", day], "end_date": [">=", day]}, "shift_type")
-    if not shift:
-        shift = frappe.db.get_value("Shift Assignment",
-                                    {"employee": employee, "status": "Active",
-                                     "start_date": ["<=", day], "end_date": ["in", ["", None]]}, "shift_type")
-
-    checkin = frappe.get_doc({
-        "doctype": "Employee Checkin", "employee": employee, "log_type": "OUT",
-        "time": out_time, "device_id": location,
-        "custom_auto_checkout": 1,
-        "latitude": lat, "longitude": lon, "geolocation": geojson, "shift": shift,
-    })
-    checkin.flags.ignore_permissions = True
-    checkin.insert(ignore_permissions=True)
-
-    # ---- finalize attendance (same rules as the manual check-out) ----
-    total_seconds, _open, _first = _worked(employee, day, None)
-    _write_attendance(employee, day, total_seconds, first_in, out_time, shift)
-
-
-def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=None):
+def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=None,
+                      auto_filled=0):
     """Create or refresh the day's Attendance from the worked seconds."""
     if shift is None:
         shift = frappe.db.get_value("Shift Assignment",
@@ -260,13 +150,15 @@ def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=No
     if existing:
         frappe.db.set_value("Attendance", existing,
                             {"working_hours": working_hours, "status": status,
-                             "late_entry": late_entry, "early_exit": early_exit})
+                             "late_entry": late_entry, "early_exit": early_exit,
+                             "custom_hours_auto_filled": auto_filled})
     else:
         att = frappe.get_doc({
             "doctype": "Attendance", "employee": employee, "attendance_date": day,
             "status": status, "working_hours": working_hours, "shift": shift,
             "company": frappe.db.get_value("Employee", employee, "company"),
             "late_entry": late_entry, "early_exit": early_exit,
+            "custom_hours_auto_filled": auto_filled,
         })
         att.flags.ignore_permissions = True
         att.flags.ignore_validate = True

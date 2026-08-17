@@ -267,6 +267,7 @@ fixtures = [
 		"Employee-custom_last_seen_latitude",
 		"Employee-custom_last_seen_longitude",
 		"Employee-custom_last_seen_at",
+		"Attendance-custom_hours_auto_filled",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.
