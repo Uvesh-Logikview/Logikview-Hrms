@@ -9,6 +9,7 @@ import frappe
 CARD = "Checkin button functionality"
 CALENDAR = "Attendance Calendar"
 DASHBOARD = "Attendance Dashboard"
+LEAVE_BAL = "Leave Balance"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -41,6 +42,8 @@ SHORTCUTS = [
 	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Logikview Appraisal", "label": "Appraisal", "color": "Green",
 	 "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Work From Home Request", "label": "Work From Home", "color": "Blue",
+	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Fun Friday Idea", "label": "Fun Friday", "color": "Orange",
 	 "doc_view": "List", "stats_filter": "[]"},
 ]
@@ -49,6 +52,8 @@ SHORTCUTS = [
 def _home_content():
 	blocks = [
 		{"id": "lvh_card", "type": "custom_block", "data": {"custom_block_name": CARD, "col": 12}},
+		{"id": "lvh_leave", "type": "custom_block",
+		 "data": {"custom_block_name": LEAVE_BAL, "col": 12}},
 		{"id": "lvh_hdr", "type": "header",
 		 "data": {"text": '<span class="h4"><b>Employee Details</b></span>', "col": 12}},
 	]
@@ -77,6 +82,7 @@ def _setup_home():
 	# a content custom_block resolves by matching custom_block_name against the
 	# child row's label, so label MUST equal the block name.
 	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD},
+	                         {"custom_block_name": LEAVE_BAL, "label": LEAVE_BAL},
 	                         {"custom_block_name": CALENDAR, "label": CALENDAR},
 	                         {"custom_block_name": DASHBOARD, "label": DASHBOARD}])
 	ws.flags.ignore_permissions = True

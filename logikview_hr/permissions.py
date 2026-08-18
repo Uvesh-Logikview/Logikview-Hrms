@@ -82,6 +82,11 @@ def leave_allocation_query(user):
 	return _linked_query(user, "tabLeave Allocation")
 
 
+def wfh_request_query(user):
+	"""Own requests + the ones you approve (your direct reports)."""
+	return _linked_query(user, "tabWork From Home Request")
+
+
 def employee_linked_has_permission(doc, ptype=None, user=None):
 	user = user or frappe.session.user
 	if _has_full_access(user):

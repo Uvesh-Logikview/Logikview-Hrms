@@ -255,8 +255,8 @@ app_license = "mit"
 # site via `bench install-app logikview_hr`. Custom HTML Block must import before
 # the "My Attendance" workspace that references it.
 fixtures = [
-	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours"]]]},
-	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard"]]]},
+	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance"]]]},
+	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance"]]]},
 	{"dt": "Custom Field", "filters": [["name", "in", [
 		"Employee Checkin-custom_location_accuracy",
 		"Employee Checkin-custom_auto_checkout",
@@ -300,15 +300,17 @@ fixtures = [
 	{"dt": "Logikview Checkin Settings"},
 	# Appraisal cycle (Feature 3): workflow + its states/actions + the director
 	# routing config (single). The DocTypes themselves ship as app module JSON.
-	{"dt": "Workflow", "filters": [["name", "=", "Logikview Appraisal Workflow"]]},
+	{"dt": "Workflow", "filters": [["name", "in", ["Logikview Appraisal Workflow", "Work From Home Approval"]]]},
 	{"dt": "Workflow State", "filters": [["name", "in", [
 		"Pending Self-Assessment", "Pending Manager Review",
 		"Pending Director Review", "Pending Final Director", "Completed",
+		"Pending Manager Approval", "Pending HR Approval", "Approved", "Rejected",
 	]]]},
 	{"dt": "Workflow Action Master", "filters": [["name", "in", [
 		"Submit Self-Assessment", "Submit Manager Review", "Forward to Final Director",
 		"Complete Appraisal", "HR: Skip to Manager", "HR: Skip to Director",
 		"HR: Skip to Final Director", "HR: Complete",
+		"Approve", "Reject", "HR: Approve",
 	]]]},
 	{"dt": "Logikview Appraisal Settings"},
 ]
@@ -329,6 +331,7 @@ permission_query_conditions = {
 	"Attendance Request": "logikview_hr.permissions.attendance_request_query",
 	"Leave Allocation": "logikview_hr.permissions.leave_allocation_query",
 	"Logikview Appraisal": "logikview_hr.permissions.appraisal_query",
+	"Work From Home Request": "logikview_hr.permissions.wfh_request_query",
 }
 
 has_permission = {
@@ -340,6 +343,7 @@ has_permission = {
 	"Attendance Request": "logikview_hr.permissions.employee_linked_has_permission",
 	"Leave Allocation": "logikview_hr.permissions.employee_linked_has_permission",
 	"Logikview Appraisal": "logikview_hr.permissions.appraisal_has_permission",
+	"Work From Home Request": "logikview_hr.permissions.employee_linked_has_permission",
 }
 
 scheduler_events = {
@@ -361,6 +365,8 @@ doc_events = {
 		"on_update": "logikview_hr.appraisal.on_appraisal_update",
 	},
 	"Attendance Request": {
+		# employee-raised, capped at 3 a month (HR/admin exempt)
+		"validate": "logikview_hr.regularization.check_monthly_limit",
 		# tell the employee when HR leaves a warning/note on their regularization
 		"on_update": "logikview_hr.regularization.notify_warning",
 		"on_submit": "logikview_hr.regularization.notify_warning",

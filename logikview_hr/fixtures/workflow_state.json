@@ -2,6 +2,24 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2026-07-22 17:11:01.579037",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2026-07-22 17:11:01.580278",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
   "icon": "",
   "modified": "2026-08-03 11:40:21.771185",
   "name": "Pending Self-Assessment",
@@ -43,5 +61,23 @@
   "name": "Completed",
   "style": "Success",
   "workflow_state_name": "Completed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-18 15:41:37.270306",
+  "name": "Pending Manager Approval",
+  "style": "Warning",
+  "workflow_state_name": "Pending Manager Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-08-18 15:41:37.286936",
+  "name": "Pending HR Approval",
+  "style": "Warning",
+  "workflow_state_name": "Pending HR Approval"
  }
 ]
