@@ -115,15 +115,61 @@ def _setup_dashboard():
 	frappe.db.commit()
 
 
+APPROVALS = "My Approvals"
+
+# Pending items an approver needs to act on.
+APPROVAL_SHORTCUTS = [
+	{"type": "DocType", "link_to": "Leave Application", "label": "Pending Leave Approvals",
+	 "color": "Orange", "doc_view": "List",
+	 "stats_filter": '[["Leave Application","workflow_state","=","Applied",false]]'},
+	{"type": "DocType", "link_to": "Work From Home Request", "label": "Pending WFH Approvals",
+	 "color": "Blue", "doc_view": "List",
+	 "stats_filter": '[["Work From Home Request","workflow_state","in","Pending Manager Approval,Pending HR Approval",false]]'},
+	{"type": "DocType", "link_to": "Attendance Request", "label": "Pending Regularizations",
+	 "color": "Purple", "doc_view": "List",
+	 "stats_filter": '[["Attendance Request","docstatus","=","0",false]]'},
+	{"type": "DocType", "link_to": "Expense Claim", "label": "Pending Expense Approvals",
+	 "color": "Green", "doc_view": "List", "stats_filter": "[]"},
+]
+
+
+def _setup_approvals():
+	"""HRMS leaves "My Approvals" as a PRIVATE workspace tied to one user
+	(for_user), so anyone else following a link to it gets
+	"Workspace my-approvals does not exist". Replace it with a public,
+	HR-gated one carrying the pending-approval shortcuts."""
+	if frappe.db.exists("Workspace", APPROVALS):
+		frappe.delete_doc("Workspace", APPROVALS, force=1, ignore_permissions=True)
+		frappe.db.commit()
+
+	content = [{"id": "appr_hdr", "type": "header",
+	            "data": {"text": '<span class="h4"><b>Pending Approvals</b></span>', "col": 12}}]
+	for i, s in enumerate(APPROVAL_SHORTCUTS):
+		content.append({"id": f"appr_sc{i}", "type": "shortcut",
+		                "data": {"shortcut_name": s["label"], "col": 3}})
+
+	ws = frappe.get_doc({
+		"doctype": "Workspace", "name": APPROVALS, "title": APPROVALS, "label": APPROVALS,
+		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "check", "sequence_id": 0.3,
+		"content": json.dumps(content),
+		"shortcuts": [{**s, "idx": i} for i, s in enumerate(APPROVAL_SHORTCUTS, start=1)],
+		"roles": [{"role": "HR Manager"}],
+	})
+	ws.flags.ignore_permissions = True
+	ws.insert()
+	frappe.db.commit()
+
+
 def _apply_visibility():
 	# same trimmed sidebar for every role (is_hidden hides for all, incl. admin)
 	for w in frappe.get_all("Workspace", fields=["name", "public"]):
-		if not w.public or w.name == DASHBOARD:
+		if not w.public or w.name in (DASHBOARD, APPROVALS):
 			continue
 		frappe.db.set_value("Workspace", w.name, "is_hidden",
 		                    0 if w.name in VISIBLE else 1, update_modified=False)
 	# drop per-workspace role restrictions EXCEPT the HR-only dashboard's
-	frappe.db.delete("Has Role", {"parenttype": "Workspace", "parent": ["!=", DASHBOARD]})
+	frappe.db.delete("Has Role", {"parenttype": "Workspace",
+	                              "parent": ["not in", [DASHBOARD, APPROVALS]]})
 	frappe.db.commit()
 
 
@@ -178,6 +224,7 @@ def setup_desk():
 	try:
 		_setup_home()
 		_setup_dashboard()
+		_setup_approvals()
 		_apply_visibility()
 		_remove_my_attendance()
 		_lock_readonly_doctypes()

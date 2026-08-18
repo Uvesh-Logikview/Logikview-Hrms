@@ -364,6 +364,11 @@ doc_events = {
 		# notify the in-the-loop (CC) director whenever the appraisal advances a stage
 		"on_update": "logikview_hr.appraisal.on_appraisal_update",
 	},
+	"Leave Application": {
+		# the stock notification only reaches leave_approver (HR); the employee's own
+		# manager approves first, so tell them too
+		"after_insert": "logikview_hr.leave.notify_manager_on_apply",
+	},
 	"Attendance Request": {
 		# employee-raised, capped at 3 a month (HR/admin exempt)
 		"validate": "logikview_hr.regularization.check_monthly_limit",
