@@ -12,6 +12,7 @@ DASHBOARD = "Attendance Dashboard"
 LEAVE_BAL = "Leave Balance"
 CELEBRATIONS = "Team Celebrations"
 HOLIDAYS = "Holiday Calendar"
+ORG = "Team Structure"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -71,6 +72,8 @@ def _home_content():
 		               "data": {"shortcut_name": s["label"], "col": 4}})
 	# Team attendance report — role-gated to HR/admin (block carries its own title),
 	# so only HR Manager / System Manager see it on Home; employees don't.
+	blocks.append({"id": "lvh_org", "type": "custom_block",
+	               "data": {"custom_block_name": ORG, "col": 12}})
 	blocks.append({"id": "lvh_dash_home", "type": "custom_block",
 	               "data": {"custom_block_name": DASHBOARD, "col": 12}})
 	blocks.append({"id": "lvh_cal_hdr", "type": "header",
@@ -95,6 +98,7 @@ def _setup_home():
 	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD},
 	                         {"custom_block_name": CELEBRATIONS, "label": CELEBRATIONS},
 	                         {"custom_block_name": HOLIDAYS, "label": HOLIDAYS},
+	                         {"custom_block_name": ORG, "label": ORG},
 	                         {"custom_block_name": LEAVE_BAL, "label": LEAVE_BAL},
 	                         {"custom_block_name": CALENDAR, "label": CALENDAR},
 	                         {"custom_block_name": DASHBOARD, "label": DASHBOARD}])
