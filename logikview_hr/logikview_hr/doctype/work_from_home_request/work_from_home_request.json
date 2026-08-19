@@ -21,7 +21,9 @@
   "cb2",
   "hr_comment",
   "employee_user",
-  "ro_user"
+  "ro_user",
+  "second_reporting_officer",
+  "ro2_user"
  ],
  "fields": [
   {
@@ -129,12 +131,29 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "second_reporting_officer",
+   "fieldtype": "Link",
+   "label": "Second Reporting Manager",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "second_reporting_officer.user_id",
+   "fieldname": "ro2_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "ro2_user",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-18 15:41:35.464284",
+ "modified": "2026-08-19 15:06:41.240738",
  "modified_by": "Administrator",
  "module": "Logikview HR",
  "name": "Work From Home Request",

@@ -61,6 +61,38 @@ def monthly_usage(employee=None, on_date=None):
 	        "month": start.strftime("%B %Y")}
 
 
+def mark_attendance_on_approval(doc, method=None):
+	"""On approval, make sure every day the regularization covers actually reads as
+	Present. Without this an approved request left the day Absent (or with no
+	attendance row at all), so approving it changed nothing on the dashboard."""
+	from frappe.utils import add_days, date_diff
+
+	company = doc.get("company") or frappe.db.get_value("Employee", doc.employee, "company")
+	day = getdate(doc.from_date)
+	for _ in range(date_diff(doc.to_date, doc.from_date) + 1):
+		existing = frappe.db.get_value("Attendance",
+		                               {"employee": doc.employee, "attendance_date": day,
+		                                "docstatus": ["!=", 2]}, ["name", "status"], as_dict=True)
+		if existing:
+			if existing.status != "Present":
+				frappe.db.set_value("Attendance", existing.name, "status", "Present")
+		else:
+			att = frappe.get_doc({
+				"doctype": "Attendance", "employee": doc.employee, "attendance_date": day,
+				"status": "Present", "company": company,
+			})
+			att.flags.ignore_permissions = True
+			att.flags.ignore_validate = True
+			try:
+				att.insert(ignore_permissions=True)
+				frappe.db.set_value("Attendance", att.name, "docstatus", 1)
+			except Exception:
+				frappe.log_error(f"regularization attendance failed {doc.name} {day}",
+				                 "Logikview Regularization")
+		day = getdate(add_days(day, 1))
+	frappe.db.commit()
+
+
 def notify_warning(doc, method=None):
 	"""Send the employee a notification when HR adds or changes the warning note."""
 	note = (doc.get("custom_hr_warning") or "").strip()

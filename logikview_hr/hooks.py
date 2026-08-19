@@ -255,8 +255,8 @@ app_license = "mit"
 # site via `bench install-app logikview_hr`. Custom HTML Block must import before
 # the "My Attendance" workspace that references it.
 fixtures = [
-	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance", "My Holidays"]]]},
-	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance", "HR Policies"]]]},
+	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance", "My Holidays", "Team Celebrations"]]]},
+	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance", "HR Policies", "Team Celebrations", "Holiday Calendar"]]]},
 	{"dt": "Custom Field", "filters": [["name", "in", [
 		"Employee Checkin-custom_location_accuracy",
 		"Employee Checkin-custom_auto_checkout",
@@ -268,6 +268,7 @@ fixtures = [
 		"Employee-custom_last_seen_longitude",
 		"Employee-custom_last_seen_at",
 		"Attendance-custom_hours_auto_filled",
+		"Employee-custom_reporting_manager_2",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.
@@ -359,6 +360,12 @@ scheduler_events = {
 			"logikview_hr.checkin.auto_checkout",
 		],
 	},
+}
+
+# the stock Employee tree runs through our row-level filter, so a regular
+# employee saw an empty org chart - serve names/reporting lines to everyone
+override_whitelisted_methods = {
+	"erpnext.setup.doctype.employee.employee.get_children": "logikview_hr.queries.employee_tree_children",
 }
 
 doc_events = {

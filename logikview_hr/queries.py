@@ -26,6 +26,37 @@ def approver_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+def employee_tree_children(doctype=None, parent=None, company=None, is_root=False, is_tree=False, **kwargs):
+	"""Org chart for everyone.
+
+	The stock ERPNext tree runs through our row-level `employee_query`, so a
+	regular employee saw an empty chart. Everyone should be able to see who
+	reports to whom, so this returns names and reporting lines only - opening a
+	colleague's record is still blocked by the normal permission rules.
+	"""
+	filters = {"status": "Active"}
+	if company and company != "All Companies":
+		filters["company"] = company
+
+	if is_root or not parent or parent == company:
+		filters["reports_to"] = ["in", ["", None]]
+	else:
+		filters["reports_to"] = parent
+
+	employees = frappe.get_all(
+		"Employee", filters=filters,
+		fields=["name as value", "employee_name as title", "designation"],
+		order_by="name", ignore_permissions=True, limit_page_length=0,
+	)
+	for e in employees:
+		if e.get("designation"):
+			e["title"] = f"{e['title']} ({e['designation']})"
+		e["expandable"] = 1 if frappe.db.exists("Employee", {"reports_to": e["value"],
+		                                                     "status": "Active"}) else 0
+	return employees
+
+
+@frappe.whitelist()
 def default_employee():
 	"""The employee to preselect on a new form: only when the user has exactly one
 	to choose from (a regular employee sees just themselves). HR/admin, who pick

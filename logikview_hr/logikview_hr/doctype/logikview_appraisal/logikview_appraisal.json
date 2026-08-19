@@ -39,7 +39,8 @@
   "first_director_user",
   "second_director_user",
   "cc_director",
-  "cc_director_user"
+  "cc_director_user",
+  "ro_feedback"
  ],
  "fields": [
   {
@@ -272,12 +273,18 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "description": "Written feedback from the reporting officer.",
+   "fieldname": "ro_feedback",
+   "fieldtype": "Text",
+   "label": "Reporting Officer Feedback"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-03 11:55:16.238873",
+ "modified": "2026-08-19 15:06:00.959358",
  "modified_by": "Administrator",
  "module": "Logikview HR",
  "name": "Logikview Appraisal",

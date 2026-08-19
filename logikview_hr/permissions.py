@@ -26,6 +26,9 @@ def _visible_employees(user):
 		return []
 	allowed = {emp}
 	allowed.update(frappe.get_all("Employee", filters={"reports_to": emp}, pluck="name"))
+	# an employee may have a second reporting manager; they approve for the same people
+	allowed.update(frappe.get_all("Employee",
+	                              filters={"custom_reporting_manager_2": emp}, pluck="name"))
 	return list(allowed)
 
 
@@ -38,15 +41,33 @@ def employee_query(user):
 	user = user or frappe.session.user
 	if _has_full_access(user):
 		return ""
-	names = _visible_employees(user)
+	names = set(_visible_employees(user))
+	# records the user has been assigned a task on
+	names.update(frappe.get_all("ToDo", filters={
+		"allocated_to": user, "reference_type": "Employee", "status": ["!=", "Cancelled"],
+	}, pluck="reference_name"))
+	names = [n for n in names if n]
 	return f"`tabEmployee`.name in ({_in_clause(names)})" if names else "1=0"
+
+
+def _assigned_to_me(doctype, name, user):
+	"""True if the user has an open assignment (ToDo) on this document. Someone
+	given a task on a record has to be able to open that record, otherwise the
+	assignment is invisible to them."""
+	return bool(frappe.db.exists("ToDo", {
+		"allocated_to": user, "reference_type": doctype,
+		"reference_name": name, "status": ["!=", "Cancelled"],
+	}))
 
 
 def employee_has_permission(doc, ptype=None, user=None):
 	user = user or frappe.session.user
 	if _has_full_access(user):
 		return True
-	return doc.name in _visible_employees(user)
+	if doc.name in _visible_employees(user):
+		return True
+	# read-only peek at a colleague's record you've been assigned a task on
+	return ptype in (None, "read", "select") and _assigned_to_me("Employee", doc.name, user)
 
 
 # ---------- doctypes with an `employee` link field ----------

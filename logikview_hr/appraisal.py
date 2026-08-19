@@ -181,18 +181,40 @@ def create_appraisal(employee, anniversary_date, years):
 
 
 def on_appraisal_update(doc, method=None):
-    """Keep the in-the-loop (CC) director informed whenever the appraisal advances."""
-    if not doc.get("cc_director"):
-        return
+    """On every stage change tell whoever has to act next, and keep the
+    in-the-loop (CC) director informed."""
     before = doc.get_doc_before_save()
     if not before or before.workflow_state == doc.workflow_state:
         return
-    user = _user_of(doc.cc_director)
-    if not user:
-        return
-    _notify([user], f"Appraisal update: {doc.employee_name} — {doc.workflow_state}",
-            f"The appraisal {doc.name} for {doc.employee_name} moved to '{doc.workflow_state}'.",
-            doc.name, f"cc-{doc.workflow_state}")
+
+    # the person whose turn it is now (this is what was missing: a director was
+    # only nudged by the Monday reminder, never when it actually reached them)
+    actor_field = STATE_ACTOR.get(doc.workflow_state)
+    actor_user = _user_of(doc.get(actor_field)) if actor_field else None
+    if actor_user:
+        what = {
+            "Pending Self-Assessment": "Please complete your self-assessment.",
+            "Pending Manager Review": "Please fill in the RO ratings and your feedback.",
+            "Pending Director Review": "Please review and add your feedback.",
+            "Pending Final Director": "Please add your closing feedback to finish this appraisal.",
+        }.get(doc.workflow_state, "Please review.")
+        _notify([actor_user], f"Appraisal awaiting you — {doc.employee_name}",
+                f"The appraisal {doc.name} for <b>{doc.employee_name}</b> is now at "
+                f"'{doc.workflow_state}'. {what}",
+                doc.name, f"actor-{doc.workflow_state}")
+
+    if doc.workflow_state == "Completed":
+        _notify([_user_of(doc.employee), _user_of(doc.reporting_officer)],
+                f"Appraisal completed — {doc.employee_name}",
+                f"The appraisal {doc.name} for {doc.employee_name} is complete. "
+                f"The manager and director feedback is on the record.",
+                doc.name, "completed")
+
+    cc_user = _user_of(doc.get("cc_director"))
+    if cc_user:
+        _notify([cc_user], f"Appraisal update: {doc.employee_name} — {doc.workflow_state}",
+                f"The appraisal {doc.name} for {doc.employee_name} moved to '{doc.workflow_state}'.",
+                doc.name, f"cc-{doc.workflow_state}")
 
 
 def _is_anniversary(doj, target):

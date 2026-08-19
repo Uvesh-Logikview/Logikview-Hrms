@@ -25,9 +25,11 @@ def _notify(user, subject, message, doc):
 
 def notify_manager_on_apply(doc, method=None):
 	"""Tell the reporting manager as soon as a leave request is raised."""
-	manager = frappe.db.get_value("Employee", doc.employee, "reports_to")
-	user = _user_of(manager)
-	if not user:
+	mgrs = frappe.db.get_value("Employee", doc.employee,
+	                           ["reports_to", "custom_reporting_manager_2"], as_dict=True) or {}
+	users = [u for u in (_user_of(mgrs.get("reports_to")),
+	                     _user_of(mgrs.get("custom_reporting_manager_2"))) if u]
+	if not users:
 		return
 
 	# only on the first pass (creation / while still awaiting the manager)
@@ -41,7 +43,8 @@ def notify_manager_on_apply(doc, method=None):
 
 	dates = f"{getdate(doc.from_date).strftime('%d %b')} - {getdate(doc.to_date).strftime('%d %b %Y')}"
 	days = doc.get("total_leave_days") or ""
-	_notify(user,
+	for user in set(users):
+		_notify(user,
 	        f"Leave request awaiting your approval - {doc.employee_name}",
 	        f"{doc.employee_name} has applied for <b>{doc.leave_type}</b> ({dates}"
 	        + (f", {days} day(s)" if days else "") + ")."

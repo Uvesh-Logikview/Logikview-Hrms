@@ -10,6 +10,8 @@ CARD = "Checkin button functionality"
 CALENDAR = "Attendance Calendar"
 DASHBOARD = "Attendance Dashboard"
 LEAVE_BAL = "Leave Balance"
+CELEBRATIONS = "Team Celebrations"
+HOLIDAYS = "Holiday Calendar"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -29,22 +31,22 @@ VISIBLE = {
 # Employee Details shortcuts on Home (order matters; label must match the
 # shortcut_name used in the workspace content).
 SHORTCUTS = [
-	{"type": "DocType", "link_to": "Employee", "label": "Employee", "color": "Blue",
-	 "doc_view": "List", "stats_filter": '[["Employee","status","=","Active",false]]'},
-	{"type": "DocType", "link_to": "Attendance", "label": "Attendance", "color": "",
-	 "doc_view": "", "stats_filter": "[]"},
+	# leave & WFH first - the two things people come here to do
 	{"type": "DocType", "link_to": "Leave Application", "label": "Leave Application", "color": "Grey",
 	 "doc_view": "List", "stats_filter": "[]"},
-	{"type": "DocType", "link_to": "Employee Checkin", "label": "Employee Checkin", "color": "Blue",
+	{"type": "DocType", "link_to": "Work From Home Request", "label": "Work From Home", "color": "Blue",
 	 "doc_view": "List", "stats_filter": "[]"},
-	{"type": "DocType", "link_to": "Attendance Request", "label": "Attendance Request", "color": "Blue",
+	{"type": "DocType", "link_to": "Attendance Request", "label": "Regularization", "color": "Purple",
 	 "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Attendance", "label": "Attendance", "color": "",
+	 "doc_view": "", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Expense Claim", "label": "Expense Claim", "color": "Blue",
 	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Logikview Appraisal", "label": "Appraisal", "color": "Green",
 	 "doc_view": "List", "stats_filter": "[]"},
-	{"type": "DocType", "link_to": "Work From Home Request", "label": "Work From Home", "color": "Blue",
-	 "doc_view": "List", "stats_filter": "[]"},
+	# org tree - names/reporting only, no personal details
+	{"type": "DocType", "link_to": "Employee", "label": "Employee Tree", "color": "Cyan",
+	 "doc_view": "Tree", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Fun Friday Idea", "label": "Fun Friday", "color": "Orange",
 	 "doc_view": "List", "stats_filter": "[]"},
 ]
@@ -52,6 +54,8 @@ SHORTCUTS = [
 
 def _home_content():
 	blocks = [
+		{"id": "lvh_cel", "type": "custom_block",
+		 "data": {"custom_block_name": CELEBRATIONS, "col": 12}},
 		{"id": "lvh_card", "type": "custom_block", "data": {"custom_block_name": CARD, "col": 12}},
 		{"id": "lvh_leave", "type": "custom_block",
 		 "data": {"custom_block_name": LEAVE_BAL, "col": 12}},
@@ -69,6 +73,8 @@ def _home_content():
 	               "data": {"text": '<span class="h4"><b>Attendance Calendar</b></span>', "col": 12}})
 	blocks.append({"id": "lvh_cal", "type": "custom_block",
 	               "data": {"custom_block_name": CALENDAR, "col": 12}})
+	blocks.append({"id": "lvh_hol", "type": "custom_block",
+	               "data": {"custom_block_name": HOLIDAYS, "col": 12}})
 	return json.dumps(blocks)
 
 
@@ -83,6 +89,8 @@ def _setup_home():
 	# a content custom_block resolves by matching custom_block_name against the
 	# child row's label, so label MUST equal the block name.
 	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD},
+	                         {"custom_block_name": CELEBRATIONS, "label": CELEBRATIONS},
+	                         {"custom_block_name": HOLIDAYS, "label": HOLIDAYS},
 	                         {"custom_block_name": LEAVE_BAL, "label": LEAVE_BAL},
 	                         {"custom_block_name": CALENDAR, "label": CALENDAR},
 	                         {"custom_block_name": DASHBOARD, "label": DASHBOARD}])
