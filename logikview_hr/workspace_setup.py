@@ -127,6 +127,24 @@ def _setup_dashboard():
 	frappe.db.commit()
 
 
+# Admin-only sidebar pages: these carry Company/HR Settings, payroll and
+# company-wide analytics, so employees should not see them at all.
+HR_ONLY = {"HR", "Recruitment", "Employee Lifecycle", "Performance",
+           "Shift & Attendance", "Salary Payout", "Tax & Benefits"}
+
+
+def _gate_hr_workspaces():
+	"""Workspace `roles` DO gate the sidebar (unlike Custom HTML Block roles)."""
+	for name in HR_ONLY:
+		if not frappe.db.exists("Workspace", name):
+			continue
+		ws = frappe.get_doc("Workspace", name)
+		ws.set("roles", [{"role": "HR Manager"}, {"role": "System Manager"}])
+		ws.flags.ignore_permissions = True
+		ws.save()
+	frappe.db.commit()
+
+
 APPROVALS = "My Approvals"
 
 # Pending items an approver needs to act on.
@@ -231,13 +249,13 @@ def _setup_policies():
 def _apply_visibility():
 	# same trimmed sidebar for every role (is_hidden hides for all, incl. admin)
 	for w in frappe.get_all("Workspace", fields=["name", "public"]):
-		if not w.public or w.name in (DASHBOARD, APPROVALS):
+		if not w.public or w.name in (DASHBOARD, APPROVALS) or w.name in HR_ONLY:
 			continue
 		frappe.db.set_value("Workspace", w.name, "is_hidden",
 		                    0 if w.name in VISIBLE else 1, update_modified=False)
 	# drop per-workspace role restrictions EXCEPT the HR-only dashboard's
 	frappe.db.delete("Has Role", {"parenttype": "Workspace",
-	                              "parent": ["not in", [DASHBOARD, APPROVALS]]})
+	                              "parent": ["not in", [DASHBOARD, APPROVALS] + list(HR_ONLY)]})
 	frappe.db.commit()
 
 
@@ -295,6 +313,7 @@ def setup_desk():
 		_setup_approvals()
 		_setup_policies()
 		_setup_org()
+		_gate_hr_workspaces()
 		_apply_visibility()
 		_remove_my_attendance()
 		_lock_readonly_doctypes()
