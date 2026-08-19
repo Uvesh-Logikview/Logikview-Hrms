@@ -18,6 +18,7 @@ ORG = "Team Structure"
 VISIBLE = {
 	"Home",
 	"HR Policies",
+	"Team Structure",
 	"HR",
 	"Recruitment",
 	"Employee Lifecycle",
@@ -72,8 +73,6 @@ def _home_content():
 		               "data": {"shortcut_name": s["label"], "col": 4}})
 	# Team attendance report — role-gated to HR/admin (block carries its own title),
 	# so only HR Manager / System Manager see it on Home; employees don't.
-	blocks.append({"id": "lvh_org", "type": "custom_block",
-	               "data": {"custom_block_name": ORG, "col": 12}})
 	blocks.append({"id": "lvh_dash_home", "type": "custom_block",
 	               "data": {"custom_block_name": DASHBOARD, "col": 12}})
 	blocks.append({"id": "lvh_cal_hdr", "type": "header",
@@ -98,7 +97,6 @@ def _setup_home():
 	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD},
 	                         {"custom_block_name": CELEBRATIONS, "label": CELEBRATIONS},
 	                         {"custom_block_name": HOLIDAYS, "label": HOLIDAYS},
-	                         {"custom_block_name": ORG, "label": ORG},
 	                         {"custom_block_name": LEAVE_BAL, "label": LEAVE_BAL},
 	                         {"custom_block_name": CALENDAR, "label": CALENDAR},
 	                         {"custom_block_name": DASHBOARD, "label": DASHBOARD}])
@@ -181,6 +179,25 @@ def _setup_approvals():
 
 
 POLICIES = "HR Policies"
+
+
+def _setup_org():
+	"""Team structure on its own sidebar page (like HR Policies), visible to all."""
+	content = [{"id": "org_blk", "type": "custom_block",
+	            "data": {"custom_block_name": ORG, "col": 12}}]
+	if frappe.db.exists("Workspace", ORG):
+		frappe.delete_doc("Workspace", ORG, force=1, ignore_permissions=True)
+		frappe.db.commit()
+	ws = frappe.get_doc({
+		"doctype": "Workspace", "name": ORG, "title": ORG, "label": ORG,
+		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "organization",
+		"sequence_id": 0.5, "content": json.dumps(content),
+		"custom_blocks": [{"custom_block_name": ORG, "label": ORG}],
+		"roles": [],          # everyone
+	})
+	ws.flags.ignore_permissions = True
+	ws.insert()
+	frappe.db.commit()
 
 
 def _setup_policies():
@@ -268,6 +285,7 @@ def setup_desk():
 		_setup_dashboard()
 		_setup_approvals()
 		_setup_policies()
+		_setup_org()
 		_apply_visibility()
 		_remove_my_attendance()
 		_lock_readonly_doctypes()
