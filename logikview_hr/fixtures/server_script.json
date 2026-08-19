@@ -93,24 +93,5 @@
   "reference_doctype": null,
   "script": "\ntoday_str = frappe.utils.today()\nthis_year = int(today_str[0:4])\n\ndef occurrence(md, year):\n    if md == \"02-29\":\n        leap = (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0))\n        if not leap:\n            md = \"02-28\"\n    return str(year) + \"-\" + md\n\nrows = frappe.get_all(\"Employee\", filters={\"status\": \"Active\"},\n                      fields=[\"name\", \"employee_name\", \"designation\",\n                              \"date_of_birth\", \"date_of_joining\"], limit_page_length=0)\nfound = []\nfor r in rows:\n    pairs = [[\"birthday\", r.get(\"date_of_birth\")], [\"anniversary\", r.get(\"date_of_joining\")]]\n    for pair in pairs:\n        kind = pair[0]\n        d = pair[1]\n        if not d:\n            continue\n        ds = str(d)\n        md = ds[5:10]\n        target = occurrence(md, this_year)\n        if target < today_str:\n            target = occurrence(md, this_year + 1)\n        days_away = frappe.utils.date_diff(target, today_str)\n        if days_away < 0 or days_away > 30:\n            continue\n        years = int(target[0:4]) - int(ds[0:4])\n        if kind == \"anniversary\" and years <= 0:\n            continue\n        found.append({\"kind\": kind, \"employee_name\": r.get(\"employee_name\"),\n                      \"designation\": r.get(\"designation\") or \"\",\n                      \"date\": target, \"days_away\": days_away,\n                      \"years\": years, \"is_today\": days_away == 0})\n\n# order by how soon it is, without using a lambda\nordered = []\nn = 0\nwhile n <= 30:\n    for item in found:\n        if item[\"days_away\"] == n:\n            ordered.append(item)\n    n = n + 1\nfrappe.response[\"message\"] = ordered[:12]\n",
   "script_type": "API"
- },
- {
-  "allow_guest": 0,
-  "api_method": "get_org_chart",
-  "cron_format": null,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Server Script",
-  "doctype_event": "Before Insert",
-  "enable_rate_limit": 0,
-  "event_frequency": "All",
-  "modified": "2026-08-19 16:07:35.035778",
-  "module": null,
-  "name": "Org Chart",
-  "rate_limit_count": 5,
-  "rate_limit_seconds": 86400,
-  "reference_doctype": null,
-  "script": "\nrows = frappe.get_all(\"Employee\", filters={\"status\": \"Active\"},\n                      fields=[\"name\", \"employee_name\", \"designation\", \"department\",\n                              \"reports_to\", \"custom_reporting_manager_2\", \"image\"],\n                      order_by=\"employee_name\", limit_page_length=0, ignore_permissions=True)\nme = frappe.db.get_value(\"Employee\", {\"user_id\": frappe.session.user}, \"name\")\nout = []\nfor r in rows:\n    out.append({\"name\": r.get(\"name\"), \"employee_name\": r.get(\"employee_name\"),\n                \"designation\": r.get(\"designation\") or \"\",\n                \"department\": (r.get(\"department\") or \"\").replace(\" - LA\", \"\"),\n                \"reports_to\": r.get(\"reports_to\") or \"\",\n                \"reports_to_2\": r.get(\"custom_reporting_manager_2\") or \"\",\n                \"image\": r.get(\"image\") or \"\",\n                \"is_me\": r.get(\"name\") == me})\nfrappe.response[\"message\"] = out\n",
-  "script_type": "API"
  }
 ]

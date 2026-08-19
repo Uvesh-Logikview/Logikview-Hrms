@@ -50,9 +50,6 @@ SHORTCUTS = [
 	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Logikview Appraisal", "label": "Appraisal", "color": "Green",
 	 "doc_view": "List", "stats_filter": "[]"},
-	# org tree - names/reporting only, no personal details
-	{"type": "DocType", "link_to": "Employee", "label": "Employee Tree", "color": "Cyan",
-	 "doc_view": "Tree", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Fun Friday Idea", "label": "Fun Friday", "color": "Orange",
 	 "doc_view": "List", "stats_filter": "[]"},
 ]
@@ -181,10 +178,22 @@ def _setup_approvals():
 POLICIES = "HR Policies"
 
 
+ORG_SHORTCUTS = [
+	{"type": "DocType", "link_to": "Employee", "label": "Employee", "color": "Blue",
+	 "doc_view": "List", "stats_filter": '[["Employee","status","=","Active",false]]'},
+	{"type": "DocType", "link_to": "Employee", "label": "Employee Tree", "color": "Cyan",
+	 "doc_view": "Tree", "stats_filter": "[]"},
+]
+
+
 def _setup_org():
-	"""Team structure on its own sidebar page (like HR Policies), visible to all."""
-	content = [{"id": "org_blk", "type": "custom_block",
-	            "data": {"custom_block_name": ORG, "col": 12}}]
+	"""Employee directory + org tree on their own sidebar page (like HR Policies),
+	visible to everyone."""
+	content = [{"id": "org_hdr", "type": "header",
+	            "data": {"text": '<span class="h4"><b>Team Structure</b></span>', "col": 12}}]
+	for i, sc in enumerate(ORG_SHORTCUTS):
+		content.append({"id": f"org_sc{i}", "type": "shortcut",
+		                "data": {"shortcut_name": sc["label"], "col": 4}})
 	if frappe.db.exists("Workspace", ORG):
 		frappe.delete_doc("Workspace", ORG, force=1, ignore_permissions=True)
 		frappe.db.commit()
@@ -192,7 +201,7 @@ def _setup_org():
 		"doctype": "Workspace", "name": ORG, "title": ORG, "label": ORG,
 		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "organization",
 		"sequence_id": 0.5, "content": json.dumps(content),
-		"custom_blocks": [{"custom_block_name": ORG, "label": ORG}],
+		"shortcuts": [{**sc, "idx": i} for i, sc in enumerate(ORG_SHORTCUTS, start=1)],
 		"roles": [],          # everyone
 	})
 	ws.flags.ignore_permissions = True
