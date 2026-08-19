@@ -107,12 +107,9 @@ def _hr_users():
 
 
 def _notify(users, subject, message, docname):
-	for user in {u for u in users if u}:
-		frappe.get_doc({
-			"doctype": "Notification Log", "for_user": user, "type": "Alert",
-			"document_type": "Work From Home Request", "document_name": docname,
-			"subject": subject, "email_content": message,
-		}).insert(ignore_permissions=True)
+	"""In-app + email (see logikview_hr.notify)."""
+	from logikview_hr.notify import notify
+	notify(users, subject, message, "Work From Home Request", docname)
 
 
 def _notify_state_change(doc):

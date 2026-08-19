@@ -5,7 +5,7 @@ employee may raise at most MONTHLY_LIMIT in a calendar month. HR/admin are exemp
 so they can still fix things on someone's behalf.
 
 When HR writes a warning/note on a regularization, the employee is told about it
-in-app (there is no SMTP on this bench).
+in-app and by email.
 """
 
 import frappe
@@ -116,12 +116,5 @@ def notify_warning(doc, method=None):
 		+ frappe.utils.escape_html(note).replace("\n", "<br>")
 	)
 
-	frappe.get_doc({
-		"doctype": "Notification Log",
-		"for_user": user,
-		"type": "Alert",
-		"document_type": doc.doctype,
-		"document_name": doc.name,
-		"subject": subject,
-		"email_content": message,
-	}).insert(ignore_permissions=True)
+	from logikview_hr.notify import notify
+	notify([user], subject, message, doc.doctype, doc.name)

@@ -8,7 +8,7 @@ to the director(s):
   * Director One's team   -> Director One reviews, then Director Two (final), done.
 Directors only add a feedback comment (no scoring).
 
-Reminders (in-app, no SMTP on this bench):
+Reminders (in-app bell + email, see logikview_hr.notify):
   * whoever's turn it is and hasn't acted -> every Monday
   * appraisal pending > `overdue_months` -> daily, to employee + RO + directors + HR
 """
@@ -89,19 +89,9 @@ def _hr_users():
 
 
 def _notify(users, subject, message, appraisal_name, dedup_key):
-    """In-app bell notification, de-duplicated per (user, appraisal, dedup_key)."""
-    for user in {u for u in users if u}:
-        marker = f"{appraisal_name}|{dedup_key}"
-        if frappe.db.exists("Notification Log",
-                            {"for_user": user, "document_name": appraisal_name,
-                             "subject": ["like", f"%{marker}%"]}):
-            continue
-        frappe.get_doc({
-            "doctype": "Notification Log", "for_user": user, "type": "Alert",
-            "document_type": "Logikview Appraisal", "document_name": appraisal_name,
-            "subject": subject + f"<!--{marker}-->",
-            "email_content": message,
-        }).insert(ignore_permissions=True)
+    """In-app + email (see logikview_hr.notify)."""
+    from logikview_hr.notify import notify
+    notify(users, subject, message, "Logikview Appraisal", appraisal_name, dedup_key)
 
 
 # ---------------------------------------------------------------- routing

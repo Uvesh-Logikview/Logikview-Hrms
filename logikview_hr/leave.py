@@ -14,13 +14,11 @@ def _user_of(employee):
 
 
 def _notify(user, subject, message, doc):
+	"""In-app + email (see logikview_hr.notify)."""
 	if not user or user == frappe.session.user:
 		return
-	frappe.get_doc({
-		"doctype": "Notification Log", "for_user": user, "type": "Alert",
-		"document_type": doc.doctype, "document_name": doc.name,
-		"subject": subject, "email_content": message,
-	}).insert(ignore_permissions=True)
+	from logikview_hr.notify import notify
+	notify([user], subject, message, doc.doctype, doc.name)
 
 
 def notify_manager_on_apply(doc, method=None):
