@@ -103,6 +103,16 @@ def leave_allocation_query(user):
 	return _linked_query(user, "tabLeave Allocation")
 
 
+def employee_document_query(user):
+	"""Your own documents; HR sees everyone's."""
+	return _linked_query(user, "tabEmployee Document")
+
+
+def comp_off_query(user):
+	"""Own requests + the ones you approve."""
+	return _linked_query(user, "tabCompensatory Leave Request")
+
+
 def wfh_request_query(user):
 	"""Own requests + the ones you approve (your direct reports)."""
 	return _linked_query(user, "tabWork From Home Request")

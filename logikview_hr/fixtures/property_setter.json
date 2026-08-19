@@ -215,13 +215,13 @@
   "doctype_or_field": "DocField",
   "field_name": "leave_type",
   "is_system_generated": 1,
-  "modified": "2026-08-19 12:41:40.950043",
+  "modified": "2026-08-19 15:25:11.757497",
   "module": null,
   "name": "Leave Application-leave_type-link_filters",
   "property": "link_filters",
   "property_type": "JSON",
   "row_name": null,
-  "value": "[[\"Leave Type\", \"name\", \"in\", [\"Paid Leave\", \"Leave Without Pay\"]]]"
+  "value": "[[\"Leave Type\", \"name\", \"in\", [\"Paid Leave\", \"Comp Off\", \"Leave Without Pay\"]]]"
  },
  {
   "default_value": null,
@@ -231,12 +231,28 @@
   "doctype_or_field": "DocField",
   "field_name": "leave_type",
   "is_system_generated": 1,
-  "modified": "2026-08-19 12:41:43.469074",
+  "modified": "2026-08-19 15:25:11.805824",
   "module": null,
   "name": "Leave Allocation-leave_type-link_filters",
   "property": "link_filters",
   "property_type": "JSON",
   "row_name": null,
-  "value": "[[\"Leave Type\", \"name\", \"in\", [\"Paid Leave\", \"Leave Without Pay\"]]]"
+  "value": "[[\"Leave Type\", \"name\", \"in\", [\"Paid Leave\", \"Comp Off\", \"Leave Without Pay\"]]]"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Compensatory Leave Request",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "leave_type",
+  "is_system_generated": 1,
+  "modified": "2026-08-19 15:25:11.848835",
+  "module": null,
+  "name": "Compensatory Leave Request-leave_type-default",
+  "property": "default",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "Comp Off"
  }
 ]

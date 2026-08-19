@@ -21,6 +21,15 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-07-24 16:36:27.273262",
+  "name": "Manager Approved",
+  "style": "Info",
+  "workflow_state_name": "Manager Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-08-03 11:40:21.771185",
   "name": "Pending Self-Assessment",
   "style": "Warning",
@@ -79,5 +88,14 @@
   "name": "Pending HR Approval",
   "style": "Warning",
   "workflow_state_name": "Pending HR Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-24 16:36:26.866517",
+  "name": "Applied",
+  "style": "Warning",
+  "workflow_state_name": "Applied"
  }
 ]

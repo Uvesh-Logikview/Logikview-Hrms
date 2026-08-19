@@ -279,6 +279,7 @@ fixtures = [
 		"Attendance Request-custom_late_category-in_standard_filter",
 		"Leave Application-leave_type-link_filters",
 		"Leave Allocation-leave_type-link_filters",
+		"Compensatory Leave Request-leave_type-default",
 		"Attendance Request-custom_late_category-in_list_view",
 		"Attendance Request-custom_late_by_minutes-in_list_view",
 		"Attendance Request-custom_late_by_minutes-label",
@@ -303,11 +304,12 @@ fixtures = [
 	{"dt": "Logikview Checkin Settings"},
 	# Appraisal cycle (Feature 3): workflow + its states/actions + the director
 	# routing config (single). The DocTypes themselves ship as app module JSON.
-	{"dt": "Workflow", "filters": [["name", "in", ["Logikview Appraisal Workflow", "Work From Home Approval"]]]},
+	{"dt": "Workflow", "filters": [["name", "in", ["Logikview Appraisal Workflow", "Work From Home Approval", "Comp Off Approval"]]]},
 	{"dt": "Workflow State", "filters": [["name", "in", [
 		"Pending Self-Assessment", "Pending Manager Review",
 		"Pending Director Review", "Pending Final Director", "Completed",
 		"Pending Manager Approval", "Pending HR Approval", "Approved", "Rejected",
+		"Applied", "Manager Approved",
 	]]]},
 	{"dt": "Workflow Action Master", "filters": [["name", "in", [
 		"Submit Self-Assessment", "Submit Manager Review", "Forward to Final Director",
@@ -335,6 +337,8 @@ permission_query_conditions = {
 	"Leave Allocation": "logikview_hr.permissions.leave_allocation_query",
 	"Logikview Appraisal": "logikview_hr.permissions.appraisal_query",
 	"Work From Home Request": "logikview_hr.permissions.wfh_request_query",
+	"Employee Document": "logikview_hr.permissions.employee_document_query",
+	"Compensatory Leave Request": "logikview_hr.permissions.comp_off_query",
 }
 
 has_permission = {
@@ -347,6 +351,8 @@ has_permission = {
 	"Leave Allocation": "logikview_hr.permissions.employee_linked_has_permission",
 	"Logikview Appraisal": "logikview_hr.permissions.appraisal_has_permission",
 	"Work From Home Request": "logikview_hr.permissions.employee_linked_has_permission",
+	"Employee Document": "logikview_hr.permissions.employee_linked_has_permission",
+	"Compensatory Leave Request": "logikview_hr.permissions.employee_linked_has_permission",
 }
 
 scheduler_events = {
