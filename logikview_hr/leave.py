@@ -21,6 +21,13 @@ def _notify(user, subject, message, doc):
 	notify([user], subject, message, doc.doctype, doc.name)
 
 
+def _hr_users():
+	users = frappe.get_all("Has Role", filters={"role": ["in", ["HR Manager", "HR User"]],
+	                                            "parenttype": "User"}, pluck="parent")
+	return [u for u in set(users) if u and u != "Administrator"
+	        and frappe.db.get_value("User", u, "enabled")]
+
+
 def notify_manager_on_apply(doc, method=None):
 	"""Tell the reporting manager as soon as a leave request is raised."""
 	mgrs = frappe.db.get_value("Employee", doc.employee,
@@ -38,6 +45,9 @@ def notify_manager_on_apply(doc, method=None):
 		before = doc.get_doc_before_save()
 		if before:                       # already existed - don't repeat on every save
 			return
+
+	# NB: HRMS already emails the leave_approver (HR) from its own template, so
+	# adding them here just delivers the same request twice.
 
 	dates = f"{getdate(doc.from_date).strftime('%d %b')} - {getdate(doc.to_date).strftime('%d %b %Y')}"
 	days = doc.get("total_leave_days") or ""

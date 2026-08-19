@@ -65,6 +65,9 @@ def notify(users, subject, message, doctype=None, docname=None, dedup_key=None, 
 			frappe.log_error(f"notification log failed for {user}", "Logikview Notify")
 		sent_to.append(user)
 
+	# internal-only accounts (e.g. admin@logikview.local) are not real mailboxes -
+	# mailing them just generates bounces
+	sent_to = [u for u in sent_to if "@" in u and not u.lower().endswith((".local", ".localhost", ".invalid"))]
 	if not (email and sent_to and _has_outgoing()):
 		return
 	try:
