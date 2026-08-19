@@ -28,6 +28,8 @@
   "q_accomplishments",
   "q_not_accomplished",
   "q_goals",
+  "sec_ro",
+  "ro_feedback",
   "sec_dir",
   "first_director",
   "first_director_feedback",
@@ -39,8 +41,7 @@
   "first_director_user",
   "second_director_user",
   "cc_director",
-  "cc_director_user",
-  "ro_feedback"
+  "cc_director_user"
  ],
  "fields": [
   {
@@ -279,12 +280,17 @@
    "fieldname": "ro_feedback",
    "fieldtype": "Text",
    "label": "Reporting Officer Feedback"
+  },
+  {
+   "fieldname": "sec_ro",
+   "fieldtype": "Section Break",
+   "label": "Manager / Team Lead Review"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-19 15:06:00.959358",
+ "modified": "2026-08-19 16:26:28.299148",
  "modified_by": "Administrator",
  "module": "Logikview HR",
  "name": "Logikview Appraisal",
