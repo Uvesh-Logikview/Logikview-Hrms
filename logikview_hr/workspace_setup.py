@@ -14,6 +14,7 @@ LEAVE_BAL = "Leave Balance"
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
 	"Home",
+	"HR Policies",
 	"HR",
 	"Recruitment",
 	"Employee Lifecycle",
@@ -160,6 +161,28 @@ def _setup_approvals():
 	frappe.db.commit()
 
 
+POLICIES = "HR Policies"
+
+
+def _setup_policies():
+	"""HR policies & employee guidelines - its own sidebar page, visible to everyone."""
+	content = [{"id": "pol_blk", "type": "custom_block",
+	            "data": {"custom_block_name": POLICIES, "col": 12}}]
+	if frappe.db.exists("Workspace", POLICIES):
+		frappe.delete_doc("Workspace", POLICIES, force=1, ignore_permissions=True)
+		frappe.db.commit()
+	ws = frappe.get_doc({
+		"doctype": "Workspace", "name": POLICIES, "title": POLICIES, "label": POLICIES,
+		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "policy", "sequence_id": 0.4,
+		"content": json.dumps(content),
+		"custom_blocks": [{"custom_block_name": POLICIES, "label": POLICIES}],
+		"roles": [],          # everyone
+	})
+	ws.flags.ignore_permissions = True
+	ws.insert()
+	frappe.db.commit()
+
+
 def _apply_visibility():
 	# same trimmed sidebar for every role (is_hidden hides for all, incl. admin)
 	for w in frappe.get_all("Workspace", fields=["name", "public"]):
@@ -225,6 +248,7 @@ def setup_desk():
 		_setup_home()
 		_setup_dashboard()
 		_setup_approvals()
+		_setup_policies()
 		_apply_visibility()
 		_remove_my_attendance()
 		_lock_readonly_doctypes()

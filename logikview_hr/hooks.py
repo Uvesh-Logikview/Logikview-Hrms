@@ -256,7 +256,7 @@ app_license = "mit"
 # the "My Attendance" workspace that references it.
 fixtures = [
 	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance"]]]},
-	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance"]]]},
+	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance", "HR Policies"]]]},
 	{"dt": "Custom Field", "filters": [["name", "in", [
 		"Employee Checkin-custom_location_accuracy",
 		"Employee Checkin-custom_auto_checkout",
@@ -276,6 +276,8 @@ fixtures = [
 		"Employee-gender-link_filters",
 		"Employee-salutation-link_filters",
 		"Attendance Request-custom_late_category-in_standard_filter",
+		"Leave Application-leave_type-link_filters",
+		"Leave Allocation-leave_type-link_filters",
 		"Attendance Request-custom_late_category-in_list_view",
 		"Attendance Request-custom_late_by_minutes-in_list_view",
 		"Attendance Request-custom_late_by_minutes-label",
