@@ -338,6 +338,7 @@ permission_query_conditions = {
 	"Logikview Appraisal": "logikview_hr.permissions.appraisal_query",
 	"Work From Home Request": "logikview_hr.permissions.wfh_request_query",
 	"Employee Document": "logikview_hr.permissions.employee_document_query",
+	"User": "logikview_hr.permissions.user_query",
 	"Compensatory Leave Request": "logikview_hr.permissions.comp_off_query",
 }
 
@@ -352,6 +353,7 @@ has_permission = {
 	"Logikview Appraisal": "logikview_hr.permissions.appraisal_has_permission",
 	"Work From Home Request": "logikview_hr.permissions.employee_linked_has_permission",
 	"Employee Document": "logikview_hr.permissions.employee_linked_has_permission",
+	"User": "logikview_hr.permissions.user_has_permission",
 	"Compensatory Leave Request": "logikview_hr.permissions.employee_linked_has_permission",
 }
 

