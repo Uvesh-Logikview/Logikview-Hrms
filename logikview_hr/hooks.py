@@ -255,8 +255,8 @@ app_license = "mit"
 # site via `bench install-app logikview_hr`. Custom HTML Block must import before
 # the "My Attendance" workspace that references it.
 fixtures = [
-	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance", "My Holidays", "Team Celebrations", "Org Chart"]]]},
-	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance", "HR Policies", "Team Celebrations", "Holiday Calendar", "Org Chart"]]]},
+	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance", "My Holidays", "Team Celebrations", "Org Chart", "Team Leave Balance"]]]},
+	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance", "HR Policies", "Team Celebrations", "Holiday Calendar", "Org Chart", "Leave Management"]]]},
 	{"dt": "Custom Field", "filters": [["name", "in", [
 		"Employee Checkin-custom_location_accuracy",
 		"Employee Checkin-custom_auto_checkout",

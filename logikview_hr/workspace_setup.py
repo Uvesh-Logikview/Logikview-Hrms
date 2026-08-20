@@ -14,6 +14,7 @@ CELEBRATIONS = "Team Celebrations"
 HOLIDAYS = "Holiday Calendar"
 ORG = "Team Structure"
 ORG_CHART = "Org Chart"
+LEAVE_MGMT = "Leave Management"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -146,6 +147,44 @@ def _gate_hr_workspaces():
 	frappe.db.commit()
 
 
+LEAVE_MGMT_SHORTCUTS = [
+	{"type": "DocType", "link_to": "Leave Allocation", "label": "Allocate Leave", "color": "Cyan",
+	 "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Leave Application", "label": "Leave Applications", "color": "Grey",
+	 "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Compensatory Leave Request", "label": "Comp Off Requests",
+	 "color": "Green", "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Leave Type", "label": "Leave Types", "color": "Blue",
+	 "doc_view": "List", "stats_filter": "[]"},
+]
+
+
+def _setup_leave_mgmt():
+	"""HR had no single place to see or grant leave - balances for everyone, plus
+	the doctypes they need. HR-gated."""
+	content = [{"id": "lm_hdr", "type": "header",
+	            "data": {"text": '<span class="h4"><b>Leave Management</b></span>', "col": 12}},
+	           {"id": "lm_blk", "type": "custom_block",
+	            "data": {"custom_block_name": LEAVE_MGMT, "col": 12}}]
+	for i, sc in enumerate(LEAVE_MGMT_SHORTCUTS):
+		content.append({"id": f"lm_sc{i}", "type": "shortcut",
+		                "data": {"shortcut_name": sc["label"], "col": 3}})
+	if frappe.db.exists("Workspace", LEAVE_MGMT):
+		frappe.delete_doc("Workspace", LEAVE_MGMT, force=1, ignore_permissions=True)
+		frappe.db.commit()
+	ws = frappe.get_doc({
+		"doctype": "Workspace", "name": LEAVE_MGMT, "title": LEAVE_MGMT, "label": LEAVE_MGMT,
+		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "calendar", "sequence_id": 0.25,
+		"content": json.dumps(content),
+		"custom_blocks": [{"custom_block_name": LEAVE_MGMT, "label": LEAVE_MGMT}],
+		"shortcuts": [{**sc, "idx": i} for i, sc in enumerate(LEAVE_MGMT_SHORTCUTS, start=1)],
+		"roles": [{"role": "HR Manager"}, {"role": "HR User"}],
+	})
+	ws.flags.ignore_permissions = True
+	ws.insert()
+	frappe.db.commit()
+
+
 APPROVALS = "My Approvals"
 
 # Pending items an approver needs to act on.
@@ -256,13 +295,13 @@ def _setup_policies():
 def _apply_visibility():
 	# same trimmed sidebar for every role (is_hidden hides for all, incl. admin)
 	for w in frappe.get_all("Workspace", fields=["name", "public"]):
-		if not w.public or w.name in (DASHBOARD, APPROVALS) or w.name in HR_ONLY:
+		if not w.public or w.name in (DASHBOARD, APPROVALS, LEAVE_MGMT) or w.name in HR_ONLY:
 			continue
 		frappe.db.set_value("Workspace", w.name, "is_hidden",
 		                    0 if w.name in VISIBLE else 1, update_modified=False)
 	# drop per-workspace role restrictions EXCEPT the HR-only dashboard's
 	frappe.db.delete("Has Role", {"parenttype": "Workspace",
-	                              "parent": ["not in", [DASHBOARD, APPROVALS] + list(HR_ONLY)]})
+	                              "parent": ["not in", [DASHBOARD, APPROVALS, LEAVE_MGMT] + list(HR_ONLY)]})
 	frappe.db.commit()
 
 
@@ -318,6 +357,7 @@ def setup_desk():
 		_setup_home()
 		_setup_dashboard()
 		_setup_approvals()
+		_setup_leave_mgmt()
 		_setup_policies()
 		_setup_org()
 		_gate_hr_workspaces()
