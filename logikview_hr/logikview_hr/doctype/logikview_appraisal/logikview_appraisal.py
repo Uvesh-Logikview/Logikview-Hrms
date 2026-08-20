@@ -37,6 +37,37 @@ class LogikviewAppraisal(Document):
 			self.assessment_type = d.get("assessment_type")
 
 		self._sync_rating_rows()
+		self._collect_seniors()
+
+	def _collect_seniors(self):
+		"""Everyone senior to this employee: the whole reporting line above them
+		(both managers at each level), the directors, and HR. Any of them may write
+		the feedback - it should not be locked to one person at one exact stage."""
+		seniors, seen, queue = set(), set(), [self.employee]
+		while queue:
+			emp = queue.pop()
+			if not emp or emp in seen:
+				continue
+			seen.add(emp)
+			row = frappe.db.get_value("Employee", emp,
+			                          ["reports_to", "custom_reporting_manager_2"], as_dict=True) or {}
+			for mgr in (row.get("reports_to"), row.get("custom_reporting_manager_2")):
+				if mgr and mgr not in seen:
+					queue.append(mgr)
+					user = frappe.db.get_value("Employee", mgr, "user_id")
+					if user:
+						seniors.add(user)
+
+		for field in ("first_director", "second_director", "cc_director"):
+			user = frappe.db.get_value("Employee", self.get(field), "user_id") if self.get(field) else None
+			if user:
+				seniors.add(user)
+
+		seniors.update(frappe.get_all("Has Role",
+		                              filters={"role": ["in", ["HR Manager", "HR User"]],
+		                                       "parenttype": "User"}, pluck="parent"))
+		seniors.discard(frappe.db.get_value("Employee", self.employee, "user_id"))
+		self.senior_users = ",".join(sorted(u for u in seniors if u))
 
 	def _sync_rating_rows(self):
 		"""The parameter list is fixed by assessment type. Rebuild it to exactly that

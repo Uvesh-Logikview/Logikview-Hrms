@@ -41,7 +41,8 @@
   "first_director_user",
   "second_director_user",
   "cc_director",
-  "cc_director_user"
+  "cc_director_user",
+  "senior_users"
  ],
  "fields": [
   {
@@ -285,12 +286,22 @@
    "fieldname": "sec_ro",
    "fieldtype": "Section Break",
    "label": "Manager / Team Lead Review"
+  },
+  {
+   "description": "Users senior to this employee; they may edit the feedback.",
+   "fieldname": "senior_users",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "senior_users",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-19 16:26:28.299148",
+ "modified": "2026-08-20 14:56:16.780227",
  "modified_by": "Administrator",
  "module": "Logikview HR",
  "name": "Logikview Appraisal",
