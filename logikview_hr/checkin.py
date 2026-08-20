@@ -10,8 +10,9 @@ script recomputes the real hours and clears the auto-filled flag.
 import frappe
 from frappe.utils import today, now_datetime, get_datetime, add_to_date
 
-REQUIRED_HOURS = 9
+REQUIRED_HOURS = 9                 # cap when filling in a forgotten check-out
 REQUIRED_SECONDS = REQUIRED_HOURS * 3600
+FULL_DAY_HOURS = 8                 # per HR policy: 8 working hours a day
 AUTO_AFTER = (19, 15)      # don't fill hours before this (people extend past 19:00)
 FINAL_SWEEP = (23, 30)     # last run of the night
 CUTOFF_TIME = "19:15:00"   # hours for a day with no check-out are counted to here
@@ -138,13 +139,14 @@ def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=No
             grace = shift_doc.late_entry_grace_period or 0
             if first_in > add_to_date(shift_start, minutes=grace):
                 late_entry = 1
-        if shift_doc.end_time:
-            shift_end = get_datetime(day + " " + str(shift_doc.end_time))
-            grace = shift_doc.early_exit_grace_period or 0
-            if out_time < add_to_date(shift_end, minutes=-grace):
-                early_exit = 1
+        # NB: early exit is judged on hours actually worked, not on the clock -
+        # leaving at 18:00 after a full day is not an early exit, while leaving at
+        # 19:10 having arrived at 15:00 is.
+        pass
 
     status = "Half Day" if (half_day_threshold and working_hours < half_day_threshold) else "Present"
+    if status == "Present" and working_hours < FULL_DAY_HOURS:
+        early_exit = 1
     existing = frappe.db.get_value("Attendance",
                                    {"employee": employee, "attendance_date": day, "docstatus": ["!=", 2]}, "name")
     if existing:
