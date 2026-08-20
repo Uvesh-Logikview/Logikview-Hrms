@@ -15,6 +15,7 @@ HOLIDAYS = "Holiday Calendar"
 ORG = "Team Structure"
 ORG_CHART = "Org Chart"
 LEAVE_MGMT = "Leave Management"
+APPRAISAL_BLK = "Appraisal & Goals"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -64,6 +65,8 @@ def _home_content():
 		{"id": "lvh_card", "type": "custom_block", "data": {"custom_block_name": CARD, "col": 12}},
 		{"id": "lvh_leave", "type": "custom_block",
 		 "data": {"custom_block_name": LEAVE_BAL, "col": 12}},
+		{"id": "lvh_appr", "type": "custom_block",
+		 "data": {"custom_block_name": APPRAISAL_BLK, "col": 12}},
 		{"id": "lvh_hdr", "type": "header",
 		 "data": {"text": '<span class="h4"><b>Employee Details</b></span>', "col": 12}},
 	]
@@ -97,6 +100,7 @@ def _setup_home():
 	                         {"custom_block_name": CELEBRATIONS, "label": CELEBRATIONS},
 	                         {"custom_block_name": HOLIDAYS, "label": HOLIDAYS},
 	                         {"custom_block_name": LEAVE_BAL, "label": LEAVE_BAL},
+	                         {"custom_block_name": APPRAISAL_BLK, "label": APPRAISAL_BLK},
 	                         {"custom_block_name": CALENDAR, "label": CALENDAR},
 	                         {"custom_block_name": DASHBOARD, "label": DASHBOARD}])
 	ws.flags.ignore_permissions = True
