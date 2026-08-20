@@ -13,6 +13,7 @@ LEAVE_BAL = "Leave Balance"
 CELEBRATIONS = "Team Celebrations"
 HOLIDAYS = "Holiday Calendar"
 ORG = "Team Structure"
+ORG_CHART = "Org Chart"
 
 # Workspaces visible in the sidebar (everything else is hidden) — matches hrsystem.
 VISIBLE = {
@@ -208,7 +209,9 @@ def _setup_org():
 	"""Employee directory + org tree on their own sidebar page (like HR Policies),
 	visible to everyone."""
 	content = [{"id": "org_hdr", "type": "header",
-	            "data": {"text": '<span class="h4"><b>Team Structure</b></span>', "col": 12}}]
+	            "data": {"text": '<span class="h4"><b>Team Structure</b></span>', "col": 12}},
+	           {"id": "org_chart", "type": "custom_block",
+	            "data": {"custom_block_name": ORG_CHART, "col": 12}}]
 	for i, sc in enumerate(ORG_SHORTCUTS):
 		content.append({"id": f"org_sc{i}", "type": "shortcut",
 		                "data": {"shortcut_name": sc["label"], "col": 4}})
@@ -220,6 +223,7 @@ def _setup_org():
 		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "organization",
 		"sequence_id": 0.5, "content": json.dumps(content),
 		"shortcuts": [{**sc, "idx": i} for i, sc in enumerate(ORG_SHORTCUTS, start=1)],
+		"custom_blocks": [{"custom_block_name": ORG_CHART, "label": ORG_CHART}],
 		"roles": [],          # everyone
 	})
 	ws.flags.ignore_permissions = True
