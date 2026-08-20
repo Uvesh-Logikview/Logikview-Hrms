@@ -365,6 +365,16 @@ scheduler_events = {
 		"*/15 19-23 * * *": [
 			"logikview_hr.checkin.auto_checkout",
 		],
+		# nudge anyone who hasn't checked in, once the 10:45 boundary has passed
+		"0 11 * * 1-5": [
+			"logikview_hr.reminders.morning_checkin_reminder",
+		],
+		# end of day: remind whoever is still checked in, then report the late
+		# arrivals to HR
+		"30 19 * * 1-5": [
+			"logikview_hr.reminders.evening_checkout_reminder",
+			"logikview_hr.reminders.late_attendance_report",
+		],
 	},
 }
 
