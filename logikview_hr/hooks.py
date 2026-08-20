@@ -361,22 +361,24 @@ scheduler_events = {
 	"daily": [
 		"logikview_hr.appraisal.create_due_appraisals",
 		"logikview_hr.appraisal.send_appraisal_reminders",
+		"logikview_hr.reminders.celebration_reminders",
 	],
 	# auto check-out: every 15 min in the evening (function gates to >= 19:15)
 	"cron": {
 		"*/15 19-23 * * *": [
 			"logikview_hr.checkin.auto_checkout",
 		],
-		# nudge anyone who hasn't checked in, once the 10:45 boundary has passed
-		"0 11 * * 1-5": [
-			"logikview_hr.reminders.morning_checkin_reminder",
-		],
-		# end of day: remind whoever is still checked in, then report the late
-		# arrivals to HR
-		"30 19 * * 1-5": [
-			"logikview_hr.reminders.evening_checkout_reminder",
-			"logikview_hr.reminders.late_attendance_report",
-		],
+		# attendance nudges - each only goes to people who haven't done it yet
+		"15 10 * * 1-5": ["logikview_hr.reminders.checkin_heads_up"],
+		"30 10 * * 1-5": ["logikview_hr.reminders.checkin_shift_started"],
+		"45 10 * * 1-5": ["logikview_hr.reminders.checkin_final_call"],
+		"45 18 * * 1-5": ["logikview_hr.reminders.checkout_heads_up"],
+		"0 19 * * 1-5":  ["logikview_hr.reminders.checkout_shift_end"],
+		"15 19 * * 1-5": ["logikview_hr.reminders.checkout_overdue"],
+		# no check-in by mid-afternoon -> mark the day absent
+		"0 15 * * 1-5": ["logikview_hr.reminders.mark_absent_no_checkin"],
+		# end of day report to HR
+		"30 19 * * 1-5": ["logikview_hr.reminders.late_attendance_report"],
 	},
 }
 
