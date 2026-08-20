@@ -164,6 +164,9 @@ APPROVAL_SHORTCUTS = [
 	 "stats_filter": '[["Compensatory Leave Request","workflow_state","in","Applied,Manager Approved",false]]'},
 	{"type": "DocType", "link_to": "Expense Claim", "label": "Pending Expense Approvals",
 	 "color": "Green", "doc_view": "List", "stats_filter": "[]"},
+	# HR had no obvious way in to grant leave
+	{"type": "DocType", "link_to": "Leave Allocation", "label": "Allocate Leave",
+	 "color": "Cyan", "doc_view": "List", "stats_filter": "[]"},
 ]
 
 
