@@ -125,7 +125,15 @@ def employee_linked_has_permission(doc, ptype=None, user=None):
 	# check-ins / attendance / allocations are system-managed: read-only for employees
 	if doc.doctype in READ_ONLY_FOR_EMPLOYEE and ptype and ptype not in ("read", "select"):
 		return False
-	return doc.get("employee") in _visible_employees(user)
+	emp = doc.get("employee")
+	if not emp:
+		# Attaching a file happens before the document is saved, so Frappe checks
+		# permission against an unsaved doc whose employee link isn't set yet.
+		# Refusing here blocked employees from uploading their own documents; the
+		# row-level query still limits what they can see, and the controller fills
+		# in the employee on save.
+		return True
+	return emp in _visible_employees(user)
 
 
 # ---------------- hidden service accounts ----------------

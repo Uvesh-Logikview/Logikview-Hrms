@@ -38,7 +38,8 @@ def _on_leave(employee, day):
 def _active_employees():
 	return frappe.get_all("Employee", filters={"status": "Active"},
 	                      fields=["name", "employee_name", "user_id", "department",
-	                              "date_of_birth", "date_of_joining"],
+	                              "date_of_birth", "date_of_joining",
+	                              "custom_exempt_from_attendance"],
 	                      limit_page_length=0)
 
 
@@ -65,6 +66,8 @@ def _nudge(subject, message, want, key):
 
 	sent = 0
 	for e in _active_employees():
+		if e.get("custom_exempt_from_attendance"):
+			continue            # directors etc. don't follow shift timings
 		if not e.user_id or _on_leave(e.name, day) or not want(e.name, day):
 			continue
 		notify([e.user_id], subject, message, "Employee", e.name, dedup_key=f"{key}-{day}")
@@ -139,10 +142,11 @@ def mark_absent_no_checkin():
 		if frappe.db.exists("Attendance", {"employee": e.name, "attendance_date": day,
 		                                   "docstatus": ["!=", 2]}):
 			continue
+		exempt = bool(e.get("custom_exempt_from_attendance"))
 		try:
 			att = frappe.get_doc({
 				"doctype": "Attendance", "employee": e.name, "attendance_date": day,
-				"status": "Absent", "working_hours": 0,
+				"status": "Present" if exempt else "Absent", "working_hours": 0,
 				"company": frappe.db.get_value("Employee", e.name, "company"),
 			})
 			att.flags.ignore_permissions = True
@@ -150,6 +154,8 @@ def mark_absent_no_checkin():
 			att.insert(ignore_permissions=True)
 			frappe.db.set_value("Attendance", att.name, "docstatus", 1)
 			marked += 1
+			if exempt:
+				continue        # recorded Present, nothing to tell them
 			if e.user_id:
 				notify([e.user_id], "You have been marked absent today",
 				       "No check-in was recorded by 3:00 PM, so today has been marked "
@@ -219,7 +225,7 @@ def late_attendance_report():
 
 	late, absent, present = [], [], 0
 	for e in _active_employees():
-		if _on_leave(e.name, day):
+		if _on_leave(e.name, day) or e.get("custom_exempt_from_attendance"):
 			continue
 		rows = frappe.get_all("Employee Checkin",
 		                      filters={"employee": e.name, "log_type": "IN",
