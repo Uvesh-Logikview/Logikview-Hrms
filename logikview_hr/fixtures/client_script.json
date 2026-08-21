@@ -64,5 +64,16 @@
   "name": "Employee Checkin Location",
   "script": "frappe.listview_settings['Employee Checkin'] = {\n    add_fields: ['device_id', 'custom_auto_checkout', 'log_type'],\n\n    get_indicator: function (doc) {\n        if (doc.log_type === 'IN')  return [__('IN'),  'green',  'log_type,=,IN'];\n        if (doc.log_type === 'OUT') return [__('OUT'), 'orange', 'log_type,=,OUT'];\n        return [__(doc.log_type || ''), 'grey', ''];\n    },\n\n    formatters: {\n        // where the person actually was, from the device GPS at check-in\n        device_id: function (value, df, doc) {\n            if (!value) return '';\n            var wfh = String(value).toLowerCase().indexOf('home') !== -1;\n            var office = String(value).toLowerCase().indexOf('office') !== -1;\n            var label = wfh ? 'WFH' : (office ? 'OFC' : value);\n            var bg = wfh ? '#e8f1ff' : (office ? '#e7f7ee' : '#f2f4f6');\n            var fg = wfh ? '#1263d1' : (office ? '#17794f' : '#5a6b78');\n            var pill = '<span style=\"background:' + bg + ';color:' + fg +\n                       ';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;\">' +\n                       label + '</span>';\n            if (doc && doc.custom_auto_checkout) {\n                pill += ' <span title=\"Checked out automatically by the system\" ' +\n                        'style=\"color:#8a94a0;font-size:11px;\">auto</span>';\n            }\n            return pill;\n        },\n        custom_auto_checkout: function (value) {\n            return value\n                ? '<span style=\"color:#8a94a0;font-weight:600;\">\\u2713 Auto</span>'\n                : '';\n        }\n    }\n};",
   "view": "List"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Employee",
+  "enabled": 1,
+  "modified": "2026-08-21 17:55:21.836972",
+  "module": null,
+  "name": "Employee Hide Assignments",
+  "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // employees should not see who a record is assigned to\n        if (frappe.user.has_role('HR Manager') || frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $(frm.wrapper).find('.form-assignments, .assignments, [data-fieldname=\"_assign\"]').hide();\n            $(frm.wrapper).find('.sidebar-label:contains(\"Assigned To\")').closest('.sidebar-section').hide();\n        }, 300);\n    }\n});\n",
+  "view": "Form"
  }
 ]

@@ -303,6 +303,7 @@ fixtures = [
 		"Fun Friday List Colours",
 		"Employee Approver Pickers",
 		"Employee Checkin Location",
+		"Employee Hide Assignments",
 	]]]},
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},
