@@ -170,9 +170,7 @@ def _setup_leave_mgmt():
 	            "data": {"text": '<span class="h4"><b>Leave Management</b></span>', "col": 12}},
 	           {"id": "lm_blk", "type": "custom_block",
 	            "data": {"custom_block_name": LEAVE_MGMT, "col": 12}}]
-	for i, sc in enumerate(LEAVE_MGMT_SHORTCUTS):
-		content.append({"id": f"lm_sc{i}", "type": "shortcut",
-		                "data": {"shortcut_name": sc["label"], "col": 3}})
+	# the page is the employee balance table; the doctype shortcuts were noise
 	if frappe.db.exists("Workspace", LEAVE_MGMT):
 		frappe.delete_doc("Workspace", LEAVE_MGMT, force=1, ignore_permissions=True)
 		frappe.db.commit()
@@ -181,7 +179,6 @@ def _setup_leave_mgmt():
 		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "calendar", "sequence_id": 0.25,
 		"content": json.dumps(content),
 		"custom_blocks": [{"custom_block_name": LEAVE_MGMT, "label": LEAVE_MGMT}],
-		"shortcuts": [{**sc, "idx": i} for i, sc in enumerate(LEAVE_MGMT_SHORTCUTS, start=1)],
 		"roles": [{"role": "HR Manager"}, {"role": "HR User"}],
 	})
 	ws.flags.ignore_permissions = True

@@ -3,13 +3,9 @@
 Schedule (working days only - never on a weekend, company holiday, or a day the
 person is on approved leave):
 
-  10:15  heads-up, shift starts at 10:30      -> anyone not checked in
-  10:30  shift has started                    -> anyone not checked in
-  10:45  final call, you are now marked late  -> anyone not checked in
-  15:00  mark Absent                          -> still no check-in
-  18:45  don't forget to check out            -> anyone still checked in
-  19:00  shift has ended, please check out    -> anyone still checked in
-  19:15  you haven't checked out              -> anyone still checked in
+  10:45  "Your Shift has Started."   -> anyone not checked in
+  15:00  mark Absent                 -> still no check-in
+  19:15  "Your Shift has Ended."     -> anyone still checked in
 
   daily  birthday / work anniversary notice, sent the day before.
 """
@@ -80,24 +76,9 @@ def _not_in(emp, day):
 	return not _has_checked_in(emp, day)
 
 
-def checkin_heads_up():                     # 10:15
-	return _nudge("Your shift starts at 10:30",
-	              "A quick heads-up - your shift starts at <b>10:30</b>. "
-	              "Please remember to check in when you start.",
-	              _not_in, "in-1015")
-
-
-def checkin_shift_started():                # 10:30
-	return _nudge("Shift has started - please check in",
-	              "Your shift has started. Please check in on Logikview HR now.",
-	              _not_in, "in-1030")
-
-
-def checkin_final_call():                   # 10:45
-	return _nudge("Final call - you will be marked late",
-	              "You have not checked in yet. Check-ins after <b>10:45</b> are recorded as "
-	              "a late arrival. Please check in, or raise a regularization if you are "
-	              "working from elsewhere.",
+def checkin_shift_started():                # 10:45
+	return _nudge("Your Shift has Started",
+	              "Your Shift has Started. Please check in on Logikview HR.",
 	              _not_in, "in-1045")
 
 
@@ -106,23 +87,9 @@ def _still_in(emp, day):
 	return _still_checked_in(emp, day)
 
 
-def checkout_heads_up():                    # 18:45
-	return _nudge("Don't forget to check out",
-	              "Your shift ends at <b>19:00</b>. Please remember to check out so today's "
-	              "working hours are recorded correctly.",
-	              _still_in, "out-1845")
-
-
-def checkout_shift_end():                   # 19:00
-	return _nudge("Shift has ended - please check out",
-	              "Your shift has ended. Please check out on Logikview HR.",
-	              _still_in, "out-1900")
-
-
-def checkout_overdue():                     # 19:15
-	return _nudge("You haven't checked out",
-	              "You are still checked in. Please check out now - if you forget, the system "
-	              "fills in your hours but the session stays open for the day.",
+def checkout_shift_end():                   # 19:15
+	return _nudge("Your Shift has Ended",
+	              "Your Shift has Ended. Please check out on Logikview HR.",
 	              _still_in, "out-1915")
 
 

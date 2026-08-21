@@ -174,6 +174,10 @@ app_license = "mit"
 # Overriding Methods
 # ------------------------------
 #
+# override_doctype_class = {
+# 	"ToDo": "custom_app.overrides.CustomToDo"
+# }
+
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "logikview_hr.event.get_events"
 # }
@@ -369,18 +373,20 @@ scheduler_events = {
 		"*/15 19-23 * * *": [
 			"logikview_hr.checkin.auto_checkout",
 		],
-		# attendance nudges - each only goes to people who haven't done it yet
-		"15 10 * * 1-5": ["logikview_hr.reminders.checkin_heads_up"],
-		"30 10 * * 1-5": ["logikview_hr.reminders.checkin_shift_started"],
-		"45 10 * * 1-5": ["logikview_hr.reminders.checkin_final_call"],
-		"45 18 * * 1-5": ["logikview_hr.reminders.checkout_heads_up"],
-		"0 19 * * 1-5":  ["logikview_hr.reminders.checkout_shift_end"],
-		"15 19 * * 1-5": ["logikview_hr.reminders.checkout_overdue"],
+		# one nudge each way, to people who haven't done it yet
+		"45 10 * * 1-5": ["logikview_hr.reminders.checkin_shift_started"],
+		"15 19 * * 1-5": ["logikview_hr.reminders.checkout_shift_end"],
 		# no check-in by mid-afternoon -> mark the day absent
 		"0 15 * * 1-5": ["logikview_hr.reminders.mark_absent_no_checkin"],
 		# end of day report to HR
 		"30 19 * * 1-5": ["logikview_hr.reminders.late_attendance_report"],
 	},
+}
+
+override_doctype_class = {
+	# HRMS refuses a comp-off claim unless the employee was present every day in
+	# the range; Logikview allows the claim regardless (see overrides.py)
+	"Compensatory Leave Request": "logikview_hr.overrides.LogikviewCompensatoryLeaveRequest",
 }
 
 # the stock Employee tree runs through our row-level filter, so a regular
@@ -404,6 +410,7 @@ doc_events = {
 		"validate": "logikview_hr.regularization.check_monthly_limit",
 		# tell the employee when HR leaves a warning/note on their regularization
 		"on_update": "logikview_hr.regularization.notify_warning",
-		"on_submit": "logikview_hr.regularization.notify_warning",
+		"on_submit": ["logikview_hr.regularization.notify_warning",
+		              "logikview_hr.regularization.mark_attendance_on_approval"],
 	},
 }
