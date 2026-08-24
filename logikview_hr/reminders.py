@@ -137,7 +137,8 @@ def mark_absent_no_checkin():
 
 # ---------------------------------------------------------------- celebrations
 def celebration_reminders():
-	"""Tell everyone the day before a birthday or work anniversary."""
+	"""Tell everyone the day before a birthday. Work anniversaries are not
+	announced - only birthdays."""
 	target = getdate(add_days(today(), 1))
 	from logikview_hr.notify import notify
 
@@ -145,27 +146,19 @@ def celebration_reminders():
 	recipients = [e.user_id for e in people if e.user_id]
 	sent = 0
 	for e in people:
-		for kind, d in (("birthday", e.date_of_birth), ("anniversary", e.date_of_joining)):
-			if not d:
-				continue
-			d = getdate(d)
-			if (d.month, d.day) != (target.month, target.day):
-				continue
-			years = target.year - d.year
-			if kind == "anniversary" and years <= 0:
-				continue
-			if kind == "birthday":
-				subject = f"Tomorrow is {e.employee_name}'s birthday"
-				msg = (f"<b>{e.employee_name}</b>"
-				       + (f" ({e.department.replace(' - LA', '')})" if e.department else "")
-				       + " celebrates their birthday tomorrow. Do wish them!")
-			else:
-				subject = f"{e.employee_name} completes {years} year(s) tomorrow"
-				msg = (f"<b>{e.employee_name}</b> completes <b>{years} year(s)</b> at Logikview "
-				       f"tomorrow. Do congratulate them!")
-			notify([u for u in recipients if u != e.user_id], subject, msg,
-			       "Employee", e.name, dedup_key=f"{kind}-{target}")
-			sent += 1
+		d = e.date_of_birth
+		if not d:
+			continue
+		d = getdate(d)
+		if (d.month, d.day) != (target.month, target.day):
+			continue
+		subject = f"Tomorrow is {e.employee_name}'s birthday"
+		msg = (f"<b>{e.employee_name}</b>"
+		       + (f" ({e.department.replace(' - LA', '')})" if e.department else "")
+		       + " celebrates their birthday tomorrow. Do wish them!")
+		notify([u for u in recipients if u != e.user_id], subject, msg,
+		       "Employee", e.name, dedup_key=f"birthday-{target}")
+		sent += 1
 	return sent
 
 
