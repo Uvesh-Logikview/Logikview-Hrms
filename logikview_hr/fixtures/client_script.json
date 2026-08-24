@@ -73,7 +73,7 @@
   "modified": "2026-08-21 17:55:21.836972",
   "module": null,
   "name": "Employee Hide Assignments",
-  "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // employees should not see who a record is assigned to\n        if (frappe.user.has_role('HR Manager') || frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $(frm.wrapper).find('.form-assignments, .assignments, [data-fieldname=\"_assign\"]').hide();\n            $(frm.wrapper).find('.sidebar-label:contains(\"Assigned To\")').closest('.sidebar-section').hide();\n        }, 300);\n    }\n});\n",
+  "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // hidden for everyone except the Administrator account; .form-assignments\n        // is the whole 'Assigned To' section (label, add button, and list)\n        if (frappe.session.user === 'Administrator') return;\n        setTimeout(function () {\n            $(frm.wrapper).find('.form-assignments').hide();\n        }, 300);\n    }\n});\n",
   "view": "Form"
  },
  {
