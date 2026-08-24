@@ -75,5 +75,25 @@
   "name": "Employee Hide Assignments",
   "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // employees should not see who a record is assigned to\n        if (frappe.user.has_role('HR Manager') || frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $(frm.wrapper).find('.form-assignments, .assignments, [data-fieldname=\"_assign\"]').hide();\n            $(frm.wrapper).find('.sidebar-label:contains(\"Assigned To\")').closest('.sidebar-section').hide();\n        }, 300);\n    }\n});\n",
   "view": "Form"
+ },
+ {
+  "doctype": "Client Script",
+  "name": "Employee Hide Attendance Exempt Field",
+  "dt": "Employee",
+  "view": "Form",
+  "enabled": 1,
+  "script": "frappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // Exempt from Attendance Tracking is for directors/admin only, not HR\n        if (frappe.user.has_role('System Manager')) return;\n        frm.set_df_property('custom_exempt_from_attendance', 'hidden', 1);\n        frm.refresh_field('custom_exempt_from_attendance');\n    }\n});\n",
+  "docstatus": 0,
+  "module": null
+ },
+ {
+  "doctype": "Client Script",
+  "name": "Employee Hide Attendance Exempt Filter",
+  "dt": "Employee",
+  "view": "List",
+  "enabled": 1,
+  "script": "frappe.listview_settings['Employee'] = frappe.listview_settings['Employee'] || {};\n(function () {\n    var orig = frappe.listview_settings['Employee'].onload;\n    frappe.listview_settings['Employee'].onload = function (listview) {\n        if (orig) orig(listview);\n        if (frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $('[data-fieldname=\"custom_exempt_from_attendance\"]')\n                .closest('.filter-field, .standard-filter-section, .list-sidebar-label').hide();\n        }, 800);\n    };\n})();\n",
+  "docstatus": 0,
+  "module": null
  }
 ]

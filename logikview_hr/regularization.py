@@ -5,7 +5,10 @@ employee may raise at most MONTHLY_LIMIT in a calendar month. HR/admin are exemp
 so they can still fix things on someone's behalf.
 
 When HR writes a warning/note on a regularization, the employee is told about it
-in-app and by email.
+in-app and by email. HR is also told as soon as one is raised - only HR/System
+Manager can approve these (unlike Leave Application, a reporting manager has no
+submit right here), so with no apply-notification these piled up unapproved for
+weeks with nobody aware one was waiting.
 """
 
 import frappe
@@ -17,6 +20,30 @@ MONTHLY_LIMIT = 3
 def _has_full_access(user):
 	from logikview_hr.permissions import FULL_ACCESS_ROLES
 	return bool(FULL_ACCESS_ROLES & set(frappe.get_roles(user)))
+
+
+def _hr_users():
+	users = frappe.get_all("Has Role", filters={"role": ["in", ["HR Manager", "HR User"]],
+	                                            "parenttype": "User"}, pluck="parent")
+	return [u for u in set(users) if u and u != "Administrator"
+	        and frappe.db.get_value("User", u, "enabled")]
+
+
+def notify_hr_on_apply(doc, method=None):
+	"""Tell HR as soon as a regularization is raised - they're the only ones who
+	can approve it, and nothing else was telling them one was waiting."""
+	hr = [u for u in _hr_users() if u != frappe.session.user]
+	if not hr:
+		return
+	day = getdate(doc.from_date).strftime("%d %b %Y")
+	if doc.to_date and doc.to_date != doc.from_date:
+		day += " - " + getdate(doc.to_date).strftime("%d %b %Y")
+	subject = f"Regularization awaiting approval - {doc.employee_name} ({day})"
+	message = (f"{doc.employee_name} has raised a regularization for <b>{day}</b> "
+	           f"({doc.get('reason') or 'no reason given'}). It needs HR approval "
+	           f"before it's reflected in attendance.")
+	from logikview_hr.notify import notify
+	notify(hr, subject, message, doc.doctype, doc.name, dedup_key=f"applied-{doc.name}")
 
 
 def check_monthly_limit(doc, method=None):

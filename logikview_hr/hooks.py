@@ -295,10 +295,6 @@ fixtures = [
 		"Employee Checkin-custom_auto_checkout-in_standard_filter",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
-	# "Exempt from Attendance Tracking" is permlevel 1 (Administrator only, see
-	# Custom Field fixture above); this grants System Manager read/write at that
-	# level so it isn't locked out entirely.
-	{"dt": "Custom DocPerm", "filters": [["parent", "=", "Employee"], ["permlevel", "=", 1]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
@@ -307,6 +303,8 @@ fixtures = [
 		"Employee Approver Pickers",
 		"Employee Checkin Location",
 		"Employee Hide Assignments",
+		"Employee Hide Attendance Exempt Field",
+		"Employee Hide Attendance Exempt Filter",
 	]]]},
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},
@@ -412,6 +410,8 @@ doc_events = {
 	"Attendance Request": {
 		# employee-raised, capped at 3 a month (HR/admin exempt)
 		"validate": "logikview_hr.regularization.check_monthly_limit",
+		# tell HR one is waiting on them as soon as it's raised
+		"after_insert": "logikview_hr.regularization.notify_hr_on_apply",
 		# tell the employee when HR leaves a warning/note on their regularization
 		"on_update": "logikview_hr.regularization.notify_warning",
 		"on_submit": ["logikview_hr.regularization.notify_warning",
