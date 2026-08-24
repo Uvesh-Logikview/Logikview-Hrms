@@ -37,14 +37,11 @@ def notify_manager_on_apply(doc, method=None):
 	if not users:
 		return
 
-	# only on the first pass (creation / while still awaiting the manager)
+	# only while still awaiting the manager (this hook only fires on after_insert,
+	# so it's the first pass by construction)
 	state = (doc.get("workflow_state") or "").lower()
 	if state and "applied" not in state and "open" not in state:
 		return
-	if method == "on_update":
-		before = doc.get_doc_before_save()
-		if before:                       # already existed - don't repeat on every save
-			return
 
 	# NB: HRMS already emails the leave_approver (HR) from its own template, so
 	# adding them here just delivers the same request twice.
