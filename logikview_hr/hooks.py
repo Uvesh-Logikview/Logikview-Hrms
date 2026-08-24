@@ -282,7 +282,6 @@ fixtures = [
 		"Employee-gender-link_filters",
 		"Employee-salutation-link_filters",
 		"Attendance Request-custom_late_category-in_standard_filter",
-		"Leave Application-leave_type-link_filters",
 		"Leave Allocation-leave_type-link_filters",
 		"Compensatory Leave Request-leave_type-default",
 		"Attendance Request-custom_late_category-in_list_view",
