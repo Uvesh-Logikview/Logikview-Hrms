@@ -130,8 +130,9 @@ def _notify_state_change(doc):
 		        "Your WFH request was approved by your manager",
 		        f"Your work-from-home request ({dates}) is now with HR for final approval.", doc.name)
 	elif state in ("Approved", "Rejected"):
-		_notify([_user_of(doc.employee), _user_of(doc.reporting_officer),
-		         _user_of(doc.get("second_reporting_officer"))],
+		# final decision - only the employee, not the manager(s) who already
+		# got their own "approved by manager" / earlier-stage notice
+		_notify([_user_of(doc.employee)],
 		        f"Your WFH request was {state.lower()}",
 		        f"Your work-from-home request ({dates}) was <b>{state.lower()}</b>."
 		        + (f"<br>HR: {frappe.utils.escape_html(doc.hr_comment)}" if doc.hr_comment else ""),
