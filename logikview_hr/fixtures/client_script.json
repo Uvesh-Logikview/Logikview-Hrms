@@ -73,7 +73,7 @@
   "modified": "2026-08-21 17:55:21.836972",
   "module": null,
   "name": "Employee Hide Assignments",
-  "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // hidden for everyone except the Administrator account; .form-assignments\n        // is the whole 'Assigned To' section (label, add button, and list)\n        if (frappe.session.user === 'Administrator') return;\n        setTimeout(function () {\n            $(frm.wrapper).find('.form-assignments').hide();\n        }, 300);\n    }\n});\n",
+  "script": "\nfrappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // hidden for everyone except the Administrator account\n        if (frappe.session.user === 'Administrator') return;\n        setTimeout(function () {\n            $(frm.wrapper).find('.form-assignments, .form-tags, .form-shared').hide();\n        }, 300);\n    }\n});\n",
   "view": "Form"
  },
  {
