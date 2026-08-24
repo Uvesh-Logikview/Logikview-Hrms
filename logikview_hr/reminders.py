@@ -7,11 +7,11 @@ person is on approved leave):
   15:00  mark Absent                 -> still no check-in
   19:15  "Your Shift has Ended."     -> anyone still checked in
 
-  daily  birthday / work anniversary notice, sent the day before.
+  daily  birthday notice, sent on the day.
 """
 
 import frappe
-from frappe.utils import add_days, getdate, today
+from frappe.utils import getdate, today
 
 
 def _is_working_day(day=None):
@@ -137,9 +137,11 @@ def mark_absent_no_checkin():
 
 # ---------------------------------------------------------------- celebrations
 def celebration_reminders():
-	"""Tell everyone the day before a birthday. Work anniversaries are not
-	announced - only birthdays."""
-	target = getdate(add_days(today(), 1))
+	"""Tell everyone on the day of a birthday. Work anniversaries are not
+	announced - only birthdays, and only this one notice (the stock HRMS
+	birthday/anniversary reminders are disabled in HR Settings to avoid a
+	second, duplicate email)."""
+	target = getdate(today())
 	from logikview_hr.notify import notify
 
 	people = _active_employees()
@@ -152,10 +154,10 @@ def celebration_reminders():
 		d = getdate(d)
 		if (d.month, d.day) != (target.month, target.day):
 			continue
-		subject = f"Tomorrow is {e.employee_name}'s birthday"
+		subject = f"Today is {e.employee_name}'s birthday"
 		msg = (f"<b>{e.employee_name}</b>"
 		       + (f" ({e.department.replace(' - LA', '')})" if e.department else "")
-		       + " celebrates their birthday tomorrow. Do wish them!")
+		       + " celebrates their birthday today. Do wish them!")
 		notify([u for u in recipients if u != e.user_id], subject, msg,
 		       "Employee", e.name, dedup_key=f"birthday-{target}")
 		sent += 1
