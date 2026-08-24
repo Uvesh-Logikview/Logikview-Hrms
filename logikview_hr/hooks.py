@@ -295,6 +295,10 @@ fixtures = [
 		"Employee Checkin-custom_auto_checkout-in_standard_filter",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
+	# "Exempt from Attendance Tracking" is permlevel 1 (Administrator only, see
+	# Custom Field fixture above); this grants System Manager read/write at that
+	# level so it isn't locked out entirely.
+	{"dt": "Custom DocPerm", "filters": [["parent", "=", "Employee"], ["permlevel", "=", 1]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
