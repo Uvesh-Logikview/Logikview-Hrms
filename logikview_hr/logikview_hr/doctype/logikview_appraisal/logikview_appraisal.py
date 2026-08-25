@@ -9,36 +9,6 @@ from frappe.utils import getdate, today
 class LogikviewAppraisal(Document):
 	def validate(self):
 		self.apply_defaults()
-		self._validate_mandatory_on_transition()
-
-	def _validate_mandatory_on_transition(self):
-		"""Block moving past a stage unless that stage's owner actually filled
-		everything in - a stage transition means the workflow_state changed
-		from what it was before this save."""
-		before = self.get_doc_before_save()
-		if not before or before.workflow_state == self.workflow_state:
-			return
-		leaving_state = before.workflow_state
-
-		if leaving_state == "Pending Self-Assessment":
-			missing = [r.parameter for r in self.ratings if not r.employee_rating]
-			if missing:
-				frappe.throw(frappe._("Please rate every parameter before submitting your "
-				                      "self-assessment. Missing: {0}").format(", ".join(missing)))
-			questions = {
-				"q_accomplishments": frappe._("What were your most significant work-related accomplishments?"),
-				"q_not_accomplished": frappe._("What did you NOT accomplish that you had planned? Why?"),
-				"q_goals": frappe._("Goals for the coming year"),
-			}
-			for fieldname, label in questions.items():
-				if not (self.get(fieldname) or "").strip():
-					frappe.throw(frappe._("Please answer: {0}").format(label))
-
-		elif leaving_state == "Pending Manager Review":
-			missing = [r.parameter for r in self.ratings if not r.ro_rating]
-			if missing:
-				frappe.throw(frappe._("Please rate every parameter before submitting your "
-				                      "review. Missing: {0}").format(", ".join(missing)))
 
 	def apply_defaults(self):
 		"""A hand-created appraisal must end up identical to a scheduler-created one:
