@@ -154,17 +154,25 @@ HIDDEN_USERS = ("logikviewhr@logikview.com",)
 
 def user_query(user):
 	user = user or frappe.session.user
-	if user == "Administrator" or user in HIDDEN_USERS:
+	if user == "Administrator" or user in HIDDEN_USERS or _has_full_access(user):
 		return ""
-	hidden = ", ".join(frappe.db.escape(u) for u in HIDDEN_USERS)
-	return f"`tabUser`.name not in ({hidden})"
+	# regular employees: only their own account, not the whole company directory
+	return f"`tabUser`.name = {frappe.db.escape(user)}"
 
 
 def user_has_permission(doc, ptype=None, user=None):
 	user = user or frappe.session.user
-	if user == "Administrator" or user in HIDDEN_USERS:
+	if user == "Administrator" or user in HIDDEN_USERS or _has_full_access(user):
 		return True
-	return doc.name not in HIDDEN_USERS
+	# doctype-level checks (no specific document, e.g. "can this role ever read
+	# User at all") come through with doc=None - let the base role permission
+	# decide those; a None here used to hit doc.name and blow up, which some
+	# Frappe versions then silently treat as "permission granted"
+	if doc is None:
+		return True
+	if doc.name in HIDDEN_USERS:
+		return False
+	return doc.name == user
 
 
 # ---------------- Logikview Appraisal ----------------
