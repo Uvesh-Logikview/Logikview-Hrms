@@ -19,8 +19,10 @@ CUTOFF_TIME = "19:15:00"   # hours for a day with no check-out are counted to he
 
 
 def _worked(employee, day, upto):
-    """Return (completed_seconds, last_in_time, first_in_time) for the day.
-    completed_seconds counts only closed IN->OUT pairs (open segment excluded)."""
+    """Return (completed_seconds, last_in_time, first_in_time, last_out_time) for
+    the day. completed_seconds counts only closed IN->OUT pairs (open segment
+    excluded). last_out_time is the most recent OUT regardless of whether the
+    day is still open."""
     # bound to THIS day only - an open-ended ">= day" pulls in later days' logs,
     # which mixes sessions together (wrong hours, and last_in ends up None so the
     # open session is never closed)
@@ -28,7 +30,7 @@ def _worked(employee, day, upto):
                           filters={"employee": employee,
                                    "time": ["between", [day + " 00:00:00", day + " 23:59:59"]]},
                           fields=["log_type", "time"], order_by="time asc")
-    total, last_in, first_in = 0, None, None
+    total, last_in, first_in, last_out = 0, None, None, None
     for l in logs:
         t = get_datetime(l.time)
         if l.log_type == "IN":
@@ -38,7 +40,27 @@ def _worked(employee, day, upto):
         elif l.log_type == "OUT" and last_in:
             total += (t - last_in).total_seconds()
             last_in = None
-    return total, last_in, first_in
+            last_out = t
+    return total, last_in, first_in, last_out
+
+
+def _grace_bonus_seconds(shift_doc, day, first_in, last_out):
+    """Minutes between shift-start and a late-but-within-grace check-in, and
+    between an early-but-within-grace check-out and shift-end, credited as
+    worked time - by design the grace period doesn't just avoid a "late"/
+    "early exit" flag, those minutes count as if they were worked."""
+    bonus = 0
+    if shift_doc.start_time and first_in:
+        shift_start = get_datetime(str(day) + " " + str(shift_doc.start_time))
+        grace_in = shift_doc.late_entry_grace_period or 0
+        if shift_start < first_in <= add_to_date(shift_start, minutes=grace_in):
+            bonus += (first_in - shift_start).total_seconds()
+    if shift_doc.end_time and last_out:
+        shift_end = get_datetime(str(day) + " " + str(shift_doc.end_time))
+        grace_out = shift_doc.early_exit_grace_period or 0
+        if add_to_date(shift_end, minutes=-grace_out) <= last_out < shift_end:
+            bonus += (shift_end - last_out).total_seconds()
+    return bonus
 
 
 def fill_open_day_hours(days_back=30):
@@ -55,7 +77,7 @@ def fill_open_day_hours(days_back=30):
     filled = 0
     for r in rows:
         past_day = str(r.d)
-        completed, last_in, first_in = _worked(r.employee, past_day, None)
+        completed, last_in, first_in, _ = _worked(r.employee, past_day, None)
         if not last_in:
             continue                       # properly checked out - nothing to do
         if past_day == day and (now_datetime().hour, now_datetime().minute) < AUTO_AFTER:
@@ -93,12 +115,12 @@ def backfill_attendance(days_back=30):
         if frappe.db.exists("Attendance", {"employee": r.employee, "attendance_date": past_day,
                                            "docstatus": ["!=", 2]}):
             continue
-        completed, last_in, first_in = _worked(r.employee, past_day, None)
+        completed, last_in, first_in, last_out = _worked(r.employee, past_day, None)
         if last_in or not completed:
             continue  # still open (fill_open_day_hours handles it) or nothing worked
         try:
             _write_attendance(r.employee, past_day, completed, first_in,
-                              get_datetime(past_day + " 00:00:00"))
+                              get_datetime(past_day + " 00:00:00"), last_out=last_out)
             made += 1
         except Exception:
             frappe.log_error(f"backfill_attendance failed for {r.employee} {past_day}",
@@ -118,7 +140,7 @@ def auto_checkout():
 
 
 def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=None,
-                      auto_filled=0):
+                      auto_filled=0, last_out=None):
     """Create or refresh the day's Attendance from the worked seconds."""
     if shift is None:
         shift = frappe.db.get_value("Shift Assignment",
@@ -127,13 +149,13 @@ def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=No
         if not shift:
             shift = frappe.db.get_value("Shift Assignment",
                                         {"employee": employee, "status": "Active",
-                                         "start_date": ["<=", day], "end_date": ["in", ["", None]]}, "shift_type")
-    working_hours = round(total_seconds / 3600, 4)
+                                         "start_date": ["<=", day], "end_date": ["is", "not set"]}, "shift_type")
 
     late_entry, early_exit, half_day_threshold = 0, 0, 0
     if shift:
         shift_doc = frappe.get_doc("Shift Type", shift)
         half_day_threshold = shift_doc.working_hours_threshold_for_half_day or 0
+        total_seconds += _grace_bonus_seconds(shift_doc, day, first_in, last_out)
         if shift_doc.start_time and first_in:
             shift_start = get_datetime(day + " " + str(shift_doc.start_time))
             grace = shift_doc.late_entry_grace_period or 0
@@ -143,6 +165,8 @@ def _write_attendance(employee, day, total_seconds, first_in, out_time, shift=No
         # leaving at 18:00 after a full day is not an early exit, while leaving at
         # 19:10 having arrived at 15:00 is.
         pass
+
+    working_hours = round(total_seconds / 3600, 4)
 
     status = "Half Day" if (half_day_threshold and working_hours < half_day_threshold) else "Present"
     if status == "Present" and working_hours < FULL_DAY_HOURS:
