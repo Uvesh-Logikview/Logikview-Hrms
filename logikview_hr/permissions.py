@@ -14,6 +14,14 @@ FULL_ACCESS_ROLES = {"HR Manager", "HR User", "System Manager"}
 # (check-ins & attendance are created by the check-in server script, not by hand)
 READ_ONLY_FOR_EMPLOYEE = {"Employee Checkin", "Attendance", "Leave Allocation"}
 
+# employees may create/edit their own request, but never delete it outright -
+# base DocPerm grants delete=1 on these (so the doctype's own "withdraw" flow
+# works before HR involvement), which also happened to let an employee erase
+# an already-decided record. Rejecting/cancelling is the correct undo, not
+# deleting history.
+NO_DELETE_FOR_EMPLOYEE = {"Attendance Request", "Compensatory Leave Request",
+                          "Work From Home Request"}
+
 
 def _has_full_access(user):
 	return bool(FULL_ACCESS_ROLES & set(frappe.get_roles(user)))
@@ -125,6 +133,8 @@ def employee_linked_has_permission(doc, ptype=None, user=None):
 	# check-ins / attendance / allocations are system-managed: read-only for employees
 	if doc.doctype in READ_ONLY_FOR_EMPLOYEE and ptype and ptype not in ("read", "select"):
 		return False
+	if ptype == "delete" and doc.doctype in NO_DELETE_FOR_EMPLOYEE:
+		return False
 	emp = doc.get("employee")
 	if not emp:
 		# Attaching a file happens before the document is saved, so Frappe checks
@@ -178,6 +188,8 @@ def appraisal_has_permission(doc, ptype=None, user=None):
 	user = user or frappe.session.user
 	if _has_full_access(user):
 		return True
+	if ptype == "delete":
+		return False
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
 		return False
