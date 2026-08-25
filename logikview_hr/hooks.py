@@ -369,6 +369,8 @@ scheduler_events = {
 		"logikview_hr.appraisal.create_due_appraisals",
 		"logikview_hr.appraisal.send_appraisal_reminders",
 		"logikview_hr.reminders.celebration_reminders",
+		"logikview_hr.logikview_hr.doctype.work_from_home_request."
+		"work_from_home_request.send_pending_approval_reminders",
 	],
 	# auto check-out: every 15 min in the evening (function gates to >= 19:15)
 	"cron": {
