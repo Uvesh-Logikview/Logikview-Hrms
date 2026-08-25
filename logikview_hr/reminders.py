@@ -66,7 +66,11 @@ def _nudge(subject, message, want, key):
 			continue            # directors etc. don't follow shift timings
 		if not e.user_id or _on_leave(e.name, day) or not want(e.name, day):
 			continue
-		notify([e.user_id], subject, message, "Employee", e.name, dedup_key=f"{key}-{day}")
+		# "Open in Logikview HR" should land on the check-in button, not the
+		# employee's own record - point it at Home instead of the default
+		# doctype/docname form link
+		notify([e.user_id], subject, message, "Employee", e.name, dedup_key=f"{key}-{day}",
+		       url=frappe.utils.get_url("/app/home"))
 		sent += 1
 	return sent
 

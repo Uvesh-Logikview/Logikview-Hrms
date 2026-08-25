@@ -24,10 +24,10 @@ def _form_url(doctype, docname):
 		return frappe.utils.get_url("/app")
 
 
-def _email_body(message, doctype, docname):
+def _email_body(message, doctype, docname, url=None):
 	body = f"<div style='font-size:14px;line-height:1.6;color:#1f272e;'>{message}</div>"
-	if doctype and docname:
-		url = _form_url(doctype, docname)
+	url = url or (_form_url(doctype, docname) if doctype and docname else None)
+	if url:
 		body += (
 			f"<p style='margin-top:18px;'>"
 			f"<a href='{url}' style='background:#1F4E78;color:#fff;text-decoration:none;"
@@ -37,8 +37,11 @@ def _email_body(message, doctype, docname):
 	return body
 
 
-def notify(users, subject, message, doctype=None, docname=None, dedup_key=None, email=True):
-	"""Bell + email. `dedup_key` stops the same nudge repeating for a document."""
+def notify(users, subject, message, doctype=None, docname=None, dedup_key=None, email=True, url=None):
+	"""Bell + email. `dedup_key` stops the same nudge repeating for a document.
+	`url` overrides the email's "Open in Logikview HR" link - otherwise it
+	points at the doctype/docname's own form (e.g. checkin reminders pass
+	the Home page instead of the employee's own record)."""
 	recipients = {u for u in (users or []) if u and u != "Administrator"}
 	if not recipients:
 		return
@@ -74,7 +77,7 @@ def notify(users, subject, message, doctype=None, docname=None, dedup_key=None, 
 		frappe.sendmail(
 			recipients=sent_to,
 			subject=f"[{BRAND}] {subject}",
-			message=_email_body(message, doctype, docname),
+			message=_email_body(message, doctype, docname, url=url),
 			reference_doctype=doctype,
 			reference_name=docname,
 			now=False,                     # queued, so a slow SMTP never blocks a save
