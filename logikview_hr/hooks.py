@@ -274,6 +274,7 @@ fixtures = [
 		"Attendance-custom_hours_auto_filled",
 		"Employee-custom_reporting_manager_2",
 		"Employee-custom_exempt_from_attendance",
+		"Attendance Request-workflow_state",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.
@@ -301,7 +302,9 @@ fixtures = [
 	# restricts this to the right manager, not the base permission. Combined
 	# into one filter block - a doctype named in two separate fixture blocks
 	# has each export overwrite the same file rather than merge.
-	{"dt": "Custom DocPerm", "filters": [["parent", "in", ["Compensatory Leave Request", "Leave Application"]]]},
+	{"dt": "Custom DocPerm", "filters": [["parent", "in", [
+		"Compensatory Leave Request", "Leave Application", "Attendance Request",
+	]]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
@@ -320,7 +323,7 @@ fixtures = [
 	# routing config (single). The DocTypes themselves ship as app module JSON.
 	{"dt": "Workflow", "filters": [["name", "in", [
 		"Logikview Appraisal Workflow", "Work From Home Approval", "Comp Off Approval",
-		"Leave Two-Level Approval",
+		"Leave Two-Level Approval", "Regularization Approval",
 	]]]},
 	{"dt": "Workflow State", "filters": [["name", "in", [
 		"Pending Self-Assessment", "Pending Manager Review",
