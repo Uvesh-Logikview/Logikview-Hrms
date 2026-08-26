@@ -295,6 +295,11 @@ fixtures = [
 		"Employee Checkin-custom_auto_checkout-in_standard_filter",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
+	# Employee role needs "submit" here so the reporting manager (who only
+	# carries the Employee role) can complete the Approve workflow action
+	# themselves - the workflow's allowed-role + condition is what actually
+	# restricts this to the right manager, not the base permission.
+	{"dt": "Custom DocPerm", "filters": [["parent", "=", "Compensatory Leave Request"]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
