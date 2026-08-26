@@ -316,7 +316,7 @@ fixtures = [
 		"Pending Self-Assessment", "Pending Manager Review",
 		"Pending Director Review", "Pending Final Director", "Completed",
 		"Pending Manager Approval", "Pending HR Approval", "Approved", "Rejected",
-		"Applied", "Manager Approved",
+		"Applied", "Manager Approved", "Pending Approval",
 	]]]},
 	{"dt": "Workflow Action Master", "filters": [["name", "in", [
 		"Submit Self-Assessment", "Submit Manager Review", "Forward to Final Director",

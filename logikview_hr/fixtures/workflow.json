@@ -231,7 +231,7 @@
   "doctype": "Workflow",
   "document_type": "Work From Home Request",
   "is_active": 1,
-  "modified": "2026-08-19 15:06:42.458073",
+  "modified": "2026-08-26 17:35:11.330864",
   "name": "Work From Home Approval",
   "override_status": 0,
   "send_email_alert": 0,
@@ -247,23 +247,7 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "send_email": 1,
-    "state": "Pending Manager Approval",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
-   },
-   {
-    "allow_edit": "HR User",
-    "avoid_status_override": 0,
-    "doc_status": "0",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Work From Home Approval",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "send_email": 1,
-    "state": "Pending HR Approval",
+    "state": "Pending Approval",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -307,12 +291,12 @@
     "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "frappe.db.get_value(\"Employee\", doc.reporting_officer, \"user_id\") == frappe.session.user or frappe.db.get_value(\"Employee\", doc.second_reporting_officer, \"user_id\") == frappe.session.user",
-    "next_state": "Pending HR Approval",
+    "next_state": "Approved",
     "parent": "Work From Home Approval",
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
-    "state": "Pending Manager Approval",
+    "state": "Pending Approval",
     "workflow_builder_id": null
    },
    {
@@ -325,20 +309,7 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
-    "state": "Pending Manager Approval",
-    "workflow_builder_id": null
-   },
-   {
-    "action": "HR: Approve",
-    "allow_self_approval": 1,
-    "allowed": "HR Manager",
-    "condition": null,
-    "next_state": "Pending HR Approval",
-    "parent": "Work From Home Approval",
-    "parentfield": "transitions",
-    "parenttype": "Workflow",
-    "send_email_to_creator": 0,
-    "state": "Pending Manager Approval",
+    "state": "Pending Approval",
     "workflow_builder_id": null
    },
    {
@@ -351,7 +322,7 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
-    "state": "Pending HR Approval",
+    "state": "Pending Approval",
     "workflow_builder_id": null
    },
    {
@@ -364,7 +335,7 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
-    "state": "Pending HR Approval",
+    "state": "Pending Approval",
     "workflow_builder_id": null
    },
    {
@@ -377,7 +348,20 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
-    "state": "Pending HR Approval",
+    "state": "Pending Approval",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Reject",
+    "allow_self_approval": 1,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejected",
+    "parent": "Work From Home Approval",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Pending Approval",
     "workflow_builder_id": null
    }
   ],
@@ -390,7 +374,7 @@
   "doctype": "Workflow",
   "document_type": "Compensatory Leave Request",
   "is_active": 1,
-  "modified": "2026-08-19 15:25:12.041241",
+  "modified": "2026-08-26 17:34:53.797600",
   "name": "Comp Off Approval",
   "override_status": 0,
   "send_email_alert": 0,
@@ -407,22 +391,6 @@
     "parenttype": "Workflow",
     "send_email": 1,
     "state": "Applied",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
-   },
-   {
-    "allow_edit": "HR User",
-    "avoid_status_override": 0,
-    "doc_status": "0",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Comp Off Approval",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "send_email": 1,
-    "state": "Manager Approved",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -466,7 +434,7 @@
     "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "frappe.db.get_value(\"Employee\", frappe.db.get_value(\"Employee\", doc.employee, \"reports_to\"), \"user_id\") == frappe.session.user or frappe.db.get_value(\"Employee\", frappe.db.get_value(\"Employee\", doc.employee, \"custom_reporting_manager_2\"), \"user_id\") == frappe.session.user",
-    "next_state": "Manager Approved",
+    "next_state": "Approved",
     "parent": "Comp Off Approval",
     "parentfield": "transitions",
     "parenttype": "Workflow",
@@ -488,42 +456,16 @@
     "workflow_builder_id": null
    },
    {
-    "action": "HR: Approve",
+    "action": "Approve",
     "allow_self_approval": 1,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Manager Approved",
+    "next_state": "Approved",
     "parent": "Comp Off Approval",
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
     "state": "Applied",
-    "workflow_builder_id": null
-   },
-   {
-    "action": "Approve",
-    "allow_self_approval": 1,
-    "allowed": "HR Manager",
-    "condition": null,
-    "next_state": "Approved",
-    "parent": "Comp Off Approval",
-    "parentfield": "transitions",
-    "parenttype": "Workflow",
-    "send_email_to_creator": 0,
-    "state": "Manager Approved",
-    "workflow_builder_id": null
-   },
-   {
-    "action": "Approve",
-    "allow_self_approval": 1,
-    "allowed": "HR User",
-    "condition": null,
-    "next_state": "Approved",
-    "parent": "Comp Off Approval",
-    "parentfield": "transitions",
-    "parenttype": "Workflow",
-    "send_email_to_creator": 0,
-    "state": "Manager Approved",
     "workflow_builder_id": null
    },
    {
@@ -536,7 +478,33 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
-    "state": "Manager Approved",
+    "state": "Applied",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Approved",
+    "parent": "Comp Off Approval",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Applied",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Reject",
+    "allow_self_approval": 1,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejected",
+    "parent": "Comp Off Approval",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Applied",
     "workflow_builder_id": null
    }
   ],

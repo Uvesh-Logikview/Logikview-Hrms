@@ -25,7 +25,7 @@ class WorkFromHomeRequest(Document):
 		self._check_policy()
 
 		if not self.workflow_state:
-			self.workflow_state = "Pending Manager Approval"
+			self.workflow_state = "Pending Approval"
 
 	def _check_policy(self):
 		"""Company WFH policy: not on a Monday or Friday, and at most one WFH day
@@ -90,9 +90,9 @@ class WorkFromHomeRequest(Document):
 
 	def on_update(self):
 		# a brand-new request has no "before" snapshot, but its workflow_state
-		# still just changed (from nothing to Pending Manager Approval) - that
-		# case was being treated as "nothing changed" and skipped, so the
-		# manager was never told a request existed in the first place
+		# still just changed (from nothing to Pending Approval) - that case was
+		# being treated as "nothing changed" and skipped, so nobody was ever
+		# told a request existed in the first place
 		before = self.get_doc_before_save()
 		if before and before.workflow_state == self.workflow_state:
 			return
@@ -120,18 +120,15 @@ def _notify_state_change(doc):
 	dates = f"{getdate(doc.from_date).strftime('%d %b')} - {getdate(doc.to_date).strftime('%d %b %Y')}"
 	state = doc.workflow_state
 
-	if state == "Pending Manager Approval":
-		_notify([_user_of(doc.reporting_officer), _user_of(doc.get("second_reporting_officer"))],
+	if state == "Pending Approval":
+		# either the manager(s) or HR can approve this - whoever gets there
+		# first - so both are told as soon as it's raised
+		recipients = [_user_of(doc.reporting_officer), _user_of(doc.get("second_reporting_officer"))] \
+			+ _hr_users()
+		_notify(recipients,
 		        f"WFH request awaiting your approval - {doc.employee_name}",
 		        f"{doc.employee_name} has requested to work from home ({dates}).<br>"
 		        f"Reason: {frappe.utils.escape_html(doc.reason or '')}", doc.name)
-	elif state == "Pending HR Approval":
-		# HR needs to know it's their turn; the employee does not get a mail
-		# here - they get exactly one, on final approval/rejection below
-		_notify(_hr_users(),
-		        f"WFH request approved by manager - {doc.employee_name}",
-		        f"{doc.employee_name}'s work-from-home request ({dates}) was approved by their "
-		        f"manager and needs HR sign-off.", doc.name)
 	elif state in ("Approved", "Rejected"):
 		# final decision - only the employee, not the manager(s) who already
 		# got their own "approved by manager" / earlier-stage notice
@@ -143,16 +140,18 @@ def _notify_state_change(doc):
 
 
 def send_pending_approval_reminders():
-	"""Daily: nudge the manager/TL for every request still sitting at
-	Pending Manager Approval - the one-time notice on creation is easy to miss
-	in a busy inbox, so this repeats until they act."""
+	"""Daily: nudge the manager/TL and HR for every request still sitting at
+	Pending Approval - the one-time notice on creation is easy to miss in a
+	busy inbox, so this repeats until someone acts."""
 	day = frappe.utils.today()
 	for doc in frappe.get_all("Work From Home Request",
-	                         filters={"workflow_state": "Pending Manager Approval"},
+	                         filters={"workflow_state": "Pending Approval"},
 	                         fields=["name", "employee_name", "reporting_officer",
 	                                 "second_reporting_officer", "from_date", "to_date", "reason"]):
 		dates = f"{getdate(doc.from_date).strftime('%d %b')} - {getdate(doc.to_date).strftime('%d %b %Y')}"
-		_notify([_user_of(doc.reporting_officer), _user_of(doc.get("second_reporting_officer"))],
+		recipients = [_user_of(doc.reporting_officer), _user_of(doc.get("second_reporting_officer"))] \
+			+ _hr_users()
+		_notify(recipients,
 		        f"Reminder: WFH request awaiting your approval - {doc.employee_name}",
 		        f"{doc.employee_name}'s work-from-home request ({dates}) is still awaiting your "
 		        f"approval.<br>Reason: {frappe.utils.escape_html(doc.reason or '')}",
