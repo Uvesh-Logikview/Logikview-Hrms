@@ -298,8 +298,10 @@ fixtures = [
 	# Employee role needs "submit" here so the reporting manager (who only
 	# carries the Employee role) can complete the Approve workflow action
 	# themselves - the workflow's allowed-role + condition is what actually
-	# restricts this to the right manager, not the base permission.
-	{"dt": "Custom DocPerm", "filters": [["parent", "=", "Compensatory Leave Request"]]},
+	# restricts this to the right manager, not the base permission. Combined
+	# into one filter block - a doctype named in two separate fixture blocks
+	# has each export overwrite the same file rather than merge.
+	{"dt": "Custom DocPerm", "filters": [["parent", "in", ["Compensatory Leave Request", "Leave Application"]]]},
 	{"dt": "Client Script", "filters": [["name", "in", [
 		"Regularization Late Colours",
 		"Logikview Appraisal Field Locks",
@@ -316,7 +318,10 @@ fixtures = [
 	{"dt": "Logikview Checkin Settings"},
 	# Appraisal cycle (Feature 3): workflow + its states/actions + the director
 	# routing config (single). The DocTypes themselves ship as app module JSON.
-	{"dt": "Workflow", "filters": [["name", "in", ["Logikview Appraisal Workflow", "Work From Home Approval", "Comp Off Approval"]]]},
+	{"dt": "Workflow", "filters": [["name", "in", [
+		"Logikview Appraisal Workflow", "Work From Home Approval", "Comp Off Approval",
+		"Leave Two-Level Approval",
+	]]]},
 	{"dt": "Workflow State", "filters": [["name", "in", [
 		"Pending Self-Assessment", "Pending Manager Review",
 		"Pending Director Review", "Pending Final Director", "Completed",
