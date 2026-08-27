@@ -87,8 +87,8 @@ def _home_content():
 	               "data": {"text": '<span class="h4"><b>Attendance Calendar</b></span>', "col": 12}})
 	blocks.append({"id": "lvh_cal", "type": "custom_block",
 	               "data": {"custom_block_name": CALENDAR, "col": 12}})
-	blocks.append({"id": "lvh_hol", "type": "custom_block",
-	               "data": {"custom_block_name": HOLIDAYS, "col": 12}})
+	# Holiday Calendar lives on the HR Policies page (see _setup_policies), not
+	# here - it is reference material, not something you act on daily.
 	return json.dumps(blocks)
 
 
@@ -104,7 +104,6 @@ def _setup_home():
 	# child row's label, so label MUST equal the block name.
 	ws.set("custom_blocks", [{"custom_block_name": CARD, "label": CARD},
 	                         {"custom_block_name": CELEBRATIONS, "label": CELEBRATIONS},
-	                         {"custom_block_name": HOLIDAYS, "label": HOLIDAYS},
 	                         {"custom_block_name": LEAVE_BAL, "label": LEAVE_BAL},
 	                         {"custom_block_name": APPRAISAL_BLK, "label": APPRAISAL_BLK},
 	                         {"custom_block_name": CALENDAR, "label": CALENDAR},
@@ -283,7 +282,11 @@ def _setup_org():
 def _setup_policies():
 	"""HR policies & employee guidelines - its own sidebar page, visible to everyone."""
 	content = [{"id": "pol_blk", "type": "custom_block",
-	            "data": {"custom_block_name": POLICIES, "col": 12}}]
+	            "data": {"custom_block_name": POLICIES, "col": 12}},
+	           {"id": "pol_hol_hdr", "type": "header",
+	            "data": {"text": '<span class="h4"><b>Holiday Calendar</b></span>', "col": 12}},
+	           {"id": "pol_hol", "type": "custom_block",
+	            "data": {"custom_block_name": HOLIDAYS, "col": 12}}]
 	if frappe.db.exists("Workspace", POLICIES):
 		frappe.delete_doc("Workspace", POLICIES, force=1, ignore_permissions=True)
 		frappe.db.commit()
@@ -291,7 +294,8 @@ def _setup_policies():
 		"doctype": "Workspace", "name": POLICIES, "title": POLICIES, "label": POLICIES,
 		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "policy", "sequence_id": 0.4,
 		"content": json.dumps(content),
-		"custom_blocks": [{"custom_block_name": POLICIES, "label": POLICIES}],
+		"custom_blocks": [{"custom_block_name": POLICIES, "label": POLICIES},
+		                  {"custom_block_name": HOLIDAYS, "label": HOLIDAYS}],
 		"roles": [],          # everyone
 	})
 	ws.flags.ignore_permissions = True
