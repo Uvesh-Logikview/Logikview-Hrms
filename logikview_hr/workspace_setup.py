@@ -55,6 +55,12 @@ SHORTCUTS = [
 	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Fun Friday Idea", "label": "Fun Friday", "color": "Orange",
 	 "doc_view": "List", "stats_filter": "[]"},
+	# both are row-level filtered (see permissions.py): an employee sees their
+	# own check-ins, and themselves plus anyone reporting to them
+	{"type": "DocType", "link_to": "Employee Checkin", "label": "Employee Checkin", "color": "Cyan",
+	 "doc_view": "List", "stats_filter": "[]"},
+	{"type": "DocType", "link_to": "Employee", "label": "Employee", "color": "Blue",
+	 "doc_view": "List", "stats_filter": "[]"},
 ]
 
 

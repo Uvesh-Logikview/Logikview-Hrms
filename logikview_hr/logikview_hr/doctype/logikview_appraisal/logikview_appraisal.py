@@ -73,6 +73,12 @@ class LogikviewAppraisal(Document):
 		frappe.flags.in_appraisal_auto_advance = True
 		try:
 			apply_workflow(self.as_dict(), plan["action"])
+			# apply_workflow writes through its own copy of the document, so this
+			# instance - the one serialised back to the browser - still holds the
+			# old state and an out-of-date `modified`. Without this the user sees
+			# the previous status after saving (and looks like nothing happened),
+			# and their next save trips "Document has been modified".
+			self.reload()
 		except Exception:
 			# never let this block the save the user actually asked for - the
 			# explicit workflow button is still there as a fallback
