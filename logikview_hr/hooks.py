@@ -274,6 +274,7 @@ fixtures = [
 		"Attendance-custom_hours_auto_filled",
 		"Employee-custom_reporting_manager_2",
 		"Employee-custom_exempt_from_attendance",
+		"Employee-custom_notify_before_shift",
 		"Attendance Request-workflow_state",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
@@ -393,6 +394,10 @@ scheduler_events = {
 		# one nudge each way, to people who haven't done it yet
 		"45 10 * * 1-5": ["logikview_hr.reminders.checkin_shift_started"],
 		"15 19 * * 1-5": ["logikview_hr.reminders.checkout_shift_end"],
+		# advance warnings 15 min before the shift starts / ends - opt-in per
+		# employee via "Notify me before shift start and end"
+		"15 10 * * 1-5": ["logikview_hr.reminders.notify_before_shift_start"],
+		"45 18 * * 1-5": ["logikview_hr.reminders.notify_before_shift_end"],
 		# no check-in by mid-afternoon -> mark the day absent
 		"0 15 * * 1-5": ["logikview_hr.reminders.mark_absent_no_checkin"],
 		# end of day report to HR

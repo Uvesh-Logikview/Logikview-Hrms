@@ -3,9 +3,16 @@
 Schedule (working days only - never on a weekend, company holiday, or a day the
 person is on approved leave):
 
-  10:45  "Your Shift has Started."   -> anyone not checked in
-  15:00  mark Absent                 -> still no check-in
-  19:15  "Your Shift has Ended."     -> anyone still checked in
+  10:15  "Your shift starts soon."   -> OPT-IN only, not yet checked in
+  10:45  "Your Shift has Started."   -> anyone not checked in        (always on)
+  15:00  mark Absent                 -> still no check-in            (always on)
+  18:45  "Your shift ends soon."     -> OPT-IN only, still checked in
+  19:15  "Your Shift has Ended."     -> anyone still checked in      (always on)
+
+The 10:15 / 18:45 pair are advance warnings and are only sent to employees who
+tick "Notify me before shift start and end" on their profile. The 10:45 /
+19:15 pair are the you-forgot-to-check-in/out safety net and are deliberately
+NOT optional - they are what stops a day being silently lost.
 
   daily  birthday notice, sent on the day.
 """
@@ -35,7 +42,8 @@ def _active_employees():
 	return frappe.get_all("Employee", filters={"status": "Active"},
 	                      fields=["name", "employee_name", "user_id", "department",
 	                              "date_of_birth", "date_of_joining",
-	                              "custom_exempt_from_attendance"],
+	                              "custom_exempt_from_attendance",
+	                              "custom_notify_before_shift"],
 	                      limit_page_length=0)
 
 
@@ -53,8 +61,9 @@ def _still_checked_in(employee, day):
 	return bool(rows) and rows[0].log_type == "IN"
 
 
-def _nudge(subject, message, want, key):
-	"""Send to everyone matching `want(employee, day)`; once per person per day."""
+def _nudge(subject, message, want, key, opt_in=False):
+	"""Send to everyone matching `want(employee, day)`; once per person per day.
+	With opt_in=True only employees who asked for advance warnings get it."""
 	day = today()
 	if not _is_working_day(day):
 		return 0
@@ -64,6 +73,8 @@ def _nudge(subject, message, want, key):
 	for e in _active_employees():
 		if e.get("custom_exempt_from_attendance"):
 			continue            # directors etc. don't follow shift timings
+		if opt_in and not e.get("custom_notify_before_shift"):
+			continue            # advance warnings are opt-in per employee
 		if not e.user_id or _on_leave(e.name, day) or not want(e.name, day):
 			continue
 		# "Open in Logikview HR" should land on the check-in button, not the
@@ -95,6 +106,55 @@ def checkout_shift_end():                   # 19:15
 	return _nudge("Your Shift has Ended",
 	              "Your Shift has Ended. Please check out on Logikview HR.",
 	              _still_in, "out-1915")
+
+
+# ------------------------------------------------- advance warnings (opt-in)
+@frappe.whitelist()
+def get_shift_reminder_preference():
+	"""Whether the caller wants the optional pre-shift reminders."""
+	emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+	if not emp:
+		return {"available": False}
+	return {"available": True,
+	        "enabled": bool(frappe.db.get_value("Employee", emp, "custom_notify_before_shift"))}
+
+
+@frappe.whitelist()
+def set_shift_reminder_preference(enabled):
+	"""Let an employee turn their own pre-shift reminders on or off.
+
+	Employees have no write permission on the Employee doctype (by design -
+	it holds salary, manager and status fields), so this is the only way they
+	can manage their own preference without going through HR. It resolves the
+	Employee purely from the session user and writes exactly one boolean
+	field, so it cannot be used to touch anyone else's record or any other
+	field.
+	"""
+	emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+	if not emp:
+		frappe.throw(frappe._("No employee record is linked to your account."))
+	value = 1 if str(enabled) in ("1", "true", "True", "yes") else 0
+	frappe.db.set_value("Employee", emp, "custom_notify_before_shift", value,
+	                    update_modified=False)
+	frappe.db.commit()
+	return {"enabled": bool(value)}
+
+
+
+def notify_before_shift_start():            # 10:15, shift starts 10:30
+	"""Heads-up 15 minutes before the shift starts. Opt-in."""
+	return _nudge("Your shift starts soon",
+	              "Your shift starts in about 15 minutes. You can check in on "
+	              "Logikview HR once you are at work.",
+	              _not_in, "pre-in-1015", opt_in=True)
+
+
+def notify_before_shift_end():              # 18:45, shift ends 19:00
+	"""Heads-up 15 minutes before the shift ends. Opt-in."""
+	return _nudge("Your shift ends soon",
+	              "Your shift ends in about 15 minutes. Remember to check out on "
+	              "Logikview HR before you leave.",
+	              _still_in, "pre-out-1845", opt_in=True)
 
 
 # ---------------------------------------------------------------- absence
