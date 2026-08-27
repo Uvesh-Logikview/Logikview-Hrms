@@ -25,7 +25,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/logikview_hr/css/logikview_hr.css"
+app_include_css = "/assets/logikview_hr/css/logikview_hr.css"
 app_include_js = "/assets/logikview_hr/js/logikview_hr.js"
 
 # include js, css files in header of web template

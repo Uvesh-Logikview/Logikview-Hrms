@@ -1,0 +1,87 @@
+/* Logikview HR - desk theme
+ *
+ * Loaded document-wide via app_include_css. Two jobs:
+ *   1. Load the brand typefaces. Font faces registered on the document are
+ *      available inside shadow DOM too, so the dashboard blocks (which each
+ *      render in their own shadow root) can use them without re-fetching.
+ *   2. Soften the stock desk chrome so the dashboard cards sit on a calm
+ *      surface instead of flat grey.
+ *
+ * Deliberately conservative: this file styles the frame, not Frappe's
+ * internals, so a framework upgrade can't be broken by it.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root {
+	--lv-navy: #1f4e78;
+	--lv-navy-700: #17395a;
+	--lv-navy-50: #eef4fa;
+	--lv-amber: #d8871f;
+	--lv-ink: #16202b;
+	--lv-ink-60: #566674;
+	--lv-ink-40: #8794a1;
+	--lv-line: #e4ebf2;
+	--lv-canvas: #f6f8fb;
+
+	--lv-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+	--lv-font-body: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+	--lv-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/* --- desk chrome ------------------------------------------------------- */
+
+body[data-route^="Workspaces"] .layout-main-section-wrapper,
+body[data-route^="Workspaces"] .layout-main {
+	background: var(--lv-canvas);
+}
+
+/* workspace page title - the one piece of stock chrome worth branding */
+body[data-route^="Workspaces"] .page-title .title-text {
+	font-family: var(--lv-font-display);
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	color: var(--lv-ink);
+}
+
+/* "Employee Details" style headers that sit between dashboard blocks */
+.workspace-page .ce-block h4,
+.workspace-page .widget-head .widget-title {
+	font-family: var(--lv-font-body);
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	color: var(--lv-ink);
+}
+
+/* shortcut tiles: quieter at rest, lift on hover */
+.workspace-page .shortcut-widget-box {
+	border: 1px solid var(--lv-line);
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(16, 32, 48, 0.05);
+	transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.workspace-page .shortcut-widget-box:hover {
+	transform: translateY(-2px);
+	border-color: #cfdcea;
+	box-shadow: 0 8px 20px rgba(16, 32, 48, 0.09);
+}
+
+/* custom block widgets are the dashboard cards - strip the stock frame so the
+   card styling inside each shadow root is the only frame the user sees */
+.workspace-page .custom-block-widget-box {
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.workspace-page .shortcut-widget-box {
+		transition: none;
+	}
+	.workspace-page .shortcut-widget-box:hover {
+		transform: none;
+	}
+}
