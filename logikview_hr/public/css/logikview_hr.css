@@ -1,11 +1,17 @@
 /* Logikview HR - desk theme
  *
- * Loaded document-wide via app_include_css. Two jobs:
+ * Loaded document-wide via app_include_css. Three jobs:
  *   1. Load the brand typefaces. Font faces registered on the document are
  *      available inside shadow DOM too, so the dashboard blocks (which each
  *      render in their own shadow root) can use them without re-fetching.
  *   2. Soften the stock desk chrome so the dashboard cards sit on a calm
  *      surface instead of flat grey.
+ *   3. Give each shortcut tile its own accent colour and a little life on
+ *      load and hover. Every tile used to be the same white rectangle, so a
+ *      row of eleven of them read as one undifferentiated grey band.
+ *
+ * Typography is deliberately untouched - this pass changes colour, depth and
+ * motion only.
  *
  * Deliberately conservative: this file styles the frame, not Frappe's
  * internals, so a framework upgrade can't be broken by it.
@@ -27,13 +33,34 @@
 	--lv-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 	--lv-font-body: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
 	--lv-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+	/* Accent family. Sampled around the brand navy rather than a rainbow, so
+	   eleven tiles read as one palette instead of a box of crayons. */
+	--lv-a-navy:    #1f4e78;
+	--lv-a-teal:    #0f766e;
+	--lv-a-indigo:  #3f4ea8;
+	--lv-a-violet:  #5b43c9;
+	--lv-a-emerald: #17794f;
+	--lv-a-slate:   #4a5b6b;
+	--lv-a-amber:   #b3710f;
+	--lv-a-rose:    #a8384f;
+	--lv-a-orange:  #c2610d;
+	--lv-a-cyan:    #0e7490;
+	--lv-a-blue:    #1f63b8;
 }
 
 /* --- desk chrome ------------------------------------------------------- */
 
+/* Atmospheric canvas: two very wide, very faint colour washes instead of one
+   flat fill, so the page has some depth behind the cards. */
 body[data-route^="Workspaces"] .layout-main-section-wrapper,
 body[data-route^="Workspaces"] .layout-main {
-	background: var(--lv-canvas);
+	background-color: var(--lv-canvas);
+	background-image:
+		radial-gradient(1100px 520px at 12% -8%, rgba(31, 78, 120, 0.075), transparent 62%),
+		radial-gradient(900px 460px at 92% 4%, rgba(216, 135, 31, 0.055), transparent 60%);
+	background-attachment: fixed;
+	background-repeat: no-repeat;
 }
 
 /* workspace page title - the one piece of stock chrome worth branding */
@@ -44,7 +71,8 @@ body[data-route^="Workspaces"] .page-title .title-text {
 	color: var(--lv-ink);
 }
 
-/* "Employee Details" style headers that sit between dashboard blocks */
+/* "Employee Details" style headers that sit between dashboard blocks.
+   The small gradient rule is the only decoration; the type is unchanged. */
 .workspace-page .ce-block h4,
 .workspace-page .widget-head .widget-title {
 	font-family: var(--lv-font-body);
@@ -53,20 +81,151 @@ body[data-route^="Workspaces"] .page-title .title-text {
 	color: var(--lv-ink);
 }
 
-/* shortcut tiles: quieter at rest, lift on hover */
+.workspace-page .ce-block h4 {
+	position: relative;
+	padding-left: 13px;
+}
+
+.workspace-page .ce-block h4::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 4px;
+	height: 1em;
+	border-radius: 3px;
+	background: linear-gradient(180deg, var(--lv-navy), var(--lv-amber));
+}
+
+/* --- shortcut tiles ---------------------------------------------------- */
+/* Each tile carries an accent: a gradient spine down the left edge, a faint
+   diagonal wash of the same hue, and a bloom of it on hover. The default is
+   brand navy, so a tile we haven't named still looks intentional. */
+
 .workspace-page .shortcut-widget-box {
+	--lv-accent: var(--lv-a-navy);
+	position: relative;
+	overflow: hidden;
 	border: 1px solid var(--lv-line);
 	border-radius: 12px;
-	background: #fff;
+	background:
+		linear-gradient(135deg,
+			color-mix(in srgb, var(--lv-accent) 12%, #fff) 0%,
+			#fff 62%);
 	box-shadow: 0 1px 2px rgba(16, 32, 48, 0.05);
-	transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+	transition: transform 0.18s cubic-bezier(.2, .7, .3, 1),
+	            box-shadow 0.18s ease,
+	            border-color 0.18s ease;
+}
+
+/* gradient spine */
+.workspace-page .shortcut-widget-box::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 4px;
+	background: linear-gradient(180deg,
+		var(--lv-accent),
+		color-mix(in srgb, var(--lv-accent) 55%, #fff));
+	z-index: 1;
+}
+
+/* soft bloom of the accent, revealed on hover */
+.workspace-page .shortcut-widget-box::after {
+	content: "";
+	position: absolute;
+	right: -30%;
+	top: -60%;
+	width: 70%;
+	height: 200%;
+	background: radial-gradient(closest-side,
+		color-mix(in srgb, var(--lv-accent) 20%, transparent), transparent);
+	opacity: 0;
+	transition: opacity 0.22s ease;
+	pointer-events: none;
 }
 
 .workspace-page .shortcut-widget-box:hover {
-	transform: translateY(-2px);
-	border-color: #cfdcea;
-	box-shadow: 0 8px 20px rgba(16, 32, 48, 0.09);
+	transform: translateY(-3px);
+	border-color: color-mix(in srgb, var(--lv-accent) 34%, var(--lv-line));
+	box-shadow:
+		0 10px 24px color-mix(in srgb, var(--lv-accent) 20%, transparent),
+		0 2px 6px rgba(16, 32, 48, 0.06);
 }
+
+.workspace-page .shortcut-widget-box:hover::after { opacity: 1; }
+
+/* keep real content above the decorative layers */
+.workspace-page .shortcut-widget-box .widget-head,
+.workspace-page .shortcut-widget-box .widget-title,
+.workspace-page .shortcut-widget-box .widget-label {
+	position: relative;
+	z-index: 2;
+}
+
+/* icon picks up the accent instead of stock grey */
+.workspace-page .shortcut-widget-box .widget-title svg,
+.workspace-page .shortcut-widget-box svg.icon {
+	color: var(--lv-accent);
+	position: relative;
+	z-index: 2;
+}
+
+/* per-tile accents, matched to the shortcut labels in workspace_setup.py */
+.workspace-page [data-widget-name="Leave Application"] .shortcut-widget-box { --lv-accent: var(--lv-a-teal); }
+.workspace-page [data-widget-name="Work From Home"]    .shortcut-widget-box { --lv-accent: var(--lv-a-indigo); }
+.workspace-page [data-widget-name="Regularization"]    .shortcut-widget-box { --lv-accent: var(--lv-a-violet); }
+.workspace-page [data-widget-name="Comp Off"]          .shortcut-widget-box { --lv-accent: var(--lv-a-emerald); }
+.workspace-page [data-widget-name="My Documents"]      .shortcut-widget-box { --lv-accent: var(--lv-a-slate); }
+.workspace-page [data-widget-name="Attendance"]        .shortcut-widget-box { --lv-accent: var(--lv-a-navy); }
+.workspace-page [data-widget-name="Expense Claim"]     .shortcut-widget-box { --lv-accent: var(--lv-a-amber); }
+.workspace-page [data-widget-name="Appraisal"]         .shortcut-widget-box { --lv-accent: var(--lv-a-rose); }
+.workspace-page [data-widget-name="Fun Friday"]        .shortcut-widget-box { --lv-accent: var(--lv-a-orange); }
+.workspace-page [data-widget-name="Employee Checkin"]  .shortcut-widget-box { --lv-accent: var(--lv-a-cyan); }
+.workspace-page [data-widget-name="Employee"]          .shortcut-widget-box { --lv-accent: var(--lv-a-blue); }
+
+/* the widget box is sometimes the element carrying data-widget-name itself */
+.workspace-page .shortcut-widget-box[data-widget-name="Leave Application"] { --lv-accent: var(--lv-a-teal); }
+.workspace-page .shortcut-widget-box[data-widget-name="Work From Home"]    { --lv-accent: var(--lv-a-indigo); }
+.workspace-page .shortcut-widget-box[data-widget-name="Regularization"]    { --lv-accent: var(--lv-a-violet); }
+.workspace-page .shortcut-widget-box[data-widget-name="Comp Off"]          { --lv-accent: var(--lv-a-emerald); }
+.workspace-page .shortcut-widget-box[data-widget-name="My Documents"]      { --lv-accent: var(--lv-a-slate); }
+.workspace-page .shortcut-widget-box[data-widget-name="Attendance"]        { --lv-accent: var(--lv-a-navy); }
+.workspace-page .shortcut-widget-box[data-widget-name="Expense Claim"]     { --lv-accent: var(--lv-a-amber); }
+.workspace-page .shortcut-widget-box[data-widget-name="Appraisal"]         { --lv-accent: var(--lv-a-rose); }
+.workspace-page .shortcut-widget-box[data-widget-name="Fun Friday"]        { --lv-accent: var(--lv-a-orange); }
+.workspace-page .shortcut-widget-box[data-widget-name="Employee Checkin"]  { --lv-accent: var(--lv-a-cyan); }
+.workspace-page .shortcut-widget-box[data-widget-name="Employee"]          { --lv-accent: var(--lv-a-blue); }
+
+/* --- entrance ---------------------------------------------------------- */
+/* One orchestrated reveal on load, staggered by position so the page builds
+   top-to-bottom instead of everything popping at once. */
+
+@keyframes lv-rise {
+	from { opacity: 0; transform: translateY(10px); }
+	to   { opacity: 1; transform: none; }
+}
+
+.workspace-page .shortcut-widget-box,
+.workspace-page .custom-block-widget-box {
+	animation: lv-rise 0.42s cubic-bezier(.2, .7, .3, 1) both;
+}
+
+.workspace-page .ce-block:nth-child(1)  .widget { animation-delay: 0.02s; }
+.workspace-page .ce-block:nth-child(2)  .widget { animation-delay: 0.04s; }
+.workspace-page .ce-block:nth-child(3)  .widget { animation-delay: 0.06s; }
+.workspace-page .ce-block:nth-child(4)  .widget { animation-delay: 0.08s; }
+.workspace-page .ce-block:nth-child(5)  .widget { animation-delay: 0.10s; }
+.workspace-page .ce-block:nth-child(6)  .widget { animation-delay: 0.12s; }
+.workspace-page .ce-block:nth-child(7)  .widget { animation-delay: 0.14s; }
+.workspace-page .ce-block:nth-child(8)  .widget { animation-delay: 0.16s; }
+.workspace-page .ce-block:nth-child(9)  .widget { animation-delay: 0.18s; }
+.workspace-page .ce-block:nth-child(10) .widget { animation-delay: 0.20s; }
+.workspace-page .ce-block:nth-child(11) .widget { animation-delay: 0.22s; }
+.workspace-page .ce-block:nth-child(12) .widget { animation-delay: 0.24s; }
 
 /* custom block widgets are the dashboard cards - strip the stock frame so the
    card styling inside each shadow root is the only frame the user sees */
@@ -78,7 +237,9 @@ body[data-route^="Workspaces"] .page-title .title-text {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.workspace-page .shortcut-widget-box {
+	.workspace-page .shortcut-widget-box,
+	.workspace-page .custom-block-widget-box {
+		animation: none;
 		transition: none;
 	}
 	.workspace-page .shortcut-widget-box:hover {

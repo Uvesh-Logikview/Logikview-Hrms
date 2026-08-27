@@ -77,23 +77,25 @@
   "view": "Form"
  },
  {
-  "doctype": "Client Script",
-  "name": "Employee Hide Attendance Exempt Field",
-  "dt": "Employee",
-  "view": "Form",
-  "enabled": 1,
-  "script": "frappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // Exempt from Attendance Tracking is for directors/admin only, not HR\n        if (frappe.user.has_role('System Manager')) return;\n        frm.set_df_property('custom_exempt_from_attendance', 'hidden', 1);\n        frm.refresh_field('custom_exempt_from_attendance');\n    }\n});\n",
   "docstatus": 0,
-  "module": null
+  "doctype": "Client Script",
+  "dt": "Employee",
+  "enabled": 1,
+  "modified": "2026-08-27 15:42:46.103493",
+  "module": null,
+  "name": "Employee Hide Attendance Exempt Field",
+  "script": "frappe.ui.form.on('Employee', {\n    refresh(frm) {\n        // Exempt from Attendance Tracking is for directors/admin only, not HR\n        if (frappe.user.has_role('System Manager')) return;\n        frm.set_df_property('custom_exempt_from_attendance', 'hidden', 1);\n        frm.refresh_field('custom_exempt_from_attendance');\n    }\n});\n",
+  "view": "Form"
  },
  {
-  "doctype": "Client Script",
-  "name": "Employee Hide Attendance Exempt Filter",
-  "dt": "Employee",
-  "view": "List",
-  "enabled": 1,
-  "script": "frappe.listview_settings['Employee'] = frappe.listview_settings['Employee'] || {};\n(function () {\n    var orig = frappe.listview_settings['Employee'].onload;\n    frappe.listview_settings['Employee'].onload = function (listview) {\n        if (orig) orig(listview);\n        if (frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $('[data-fieldname=\"custom_exempt_from_attendance\"]')\n                .closest('.filter-field, .standard-filter-section, .list-sidebar-label').hide();\n        }, 800);\n    };\n})();\n",
   "docstatus": 0,
-  "module": null
+  "doctype": "Client Script",
+  "dt": "Employee",
+  "enabled": 1,
+  "modified": "2026-08-27 15:42:46.125967",
+  "module": null,
+  "name": "Employee Hide Attendance Exempt Filter",
+  "script": "frappe.listview_settings['Employee'] = frappe.listview_settings['Employee'] || {};\n(function () {\n    var orig = frappe.listview_settings['Employee'].onload;\n    frappe.listview_settings['Employee'].onload = function (listview) {\n        if (orig) orig(listview);\n        if (frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $('[data-fieldname=\"custom_exempt_from_attendance\"]')\n                .closest('.filter-field, .standard-filter-section, .list-sidebar-label').hide();\n        }, 800);\n    };\n})();\n",
+  "view": "List"
  }
 ]
