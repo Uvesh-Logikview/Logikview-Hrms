@@ -178,6 +178,15 @@ def user_has_permission(doc, ptype=None, user=None):
 # ---------------- Logikview Appraisal ----------------
 # Visible to: the employee, their reporting officer, the director(s) in the chain,
 # and HR/admin. Everyone else is filtered out.
+
+# A director is only involved once the manager has finished their review, so
+# they only see appraisals that have actually reached them. Without this every
+# director saw all ~18 appraisals, including ones still sitting with the
+# employee, which buried the handful actually waiting on them. Completed is
+# kept so they retain the history of what they signed off.
+DIRECTOR_VISIBLE_STATES = ("Pending Director Review", "Pending Final Director", "Completed")
+
+
 def appraisal_query(user):
 	user = user or frappe.session.user
 	if _has_full_access(user):
@@ -187,9 +196,10 @@ def appraisal_query(user):
 		return "1=0"
 	e = frappe.db.escape(emp)
 	t = "`tabLogikview Appraisal`"
-	return (f"({t}.`employee`={e} or {t}.`reporting_officer`={e} "
-	        f"or {t}.`first_director`={e} or {t}.`second_director`={e} "
-	        f"or {t}.`cc_director`={e})")
+	states = ", ".join(frappe.db.escape(s) for s in DIRECTOR_VISIBLE_STATES)
+	as_director = (f"(({t}.`first_director`={e} or {t}.`second_director`={e} "
+	               f"or {t}.`cc_director`={e}) and {t}.`workflow_state` in ({states}))")
+	return f"({t}.`employee`={e} or {t}.`reporting_officer`={e} or {as_director})"
 
 
 def appraisal_has_permission(doc, ptype=None, user=None):
@@ -201,6 +211,9 @@ def appraisal_has_permission(doc, ptype=None, user=None):
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
 		return False
-	return emp in (doc.get("employee"), doc.get("reporting_officer"),
-	               doc.get("first_director"), doc.get("second_director"),
-	               doc.get("cc_director"))
+	if emp in (doc.get("employee"), doc.get("reporting_officer")):
+		return True
+	# same director rule as the list query, so a direct link can't sidestep it
+	if emp in (doc.get("first_director"), doc.get("second_director"), doc.get("cc_director")):
+		return doc.get("workflow_state") in DIRECTOR_VISIBLE_STATES
+	return False

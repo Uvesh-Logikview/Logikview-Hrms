@@ -11,6 +11,75 @@ class LogikviewAppraisal(Document):
 		self.apply_defaults()
 		self._validate_mandatory_on_transition()
 
+	def on_update(self):
+		self._auto_advance_workflow()
+
+	# Which user owns each stage, what they must fill to be done, and where the
+	# appraisal goes next. Keyed by the state being left.
+	def _stage_plan(self):
+		return {
+			"Pending Self-Assessment": {
+				"actor": self.employee_user,
+				"complete": (
+					all(r.employee_rating for r in self.ratings)
+					and all((self.get(q) or "").strip()
+					        for q in ("q_accomplishments", "q_not_accomplished", "q_goals"))
+				),
+				"action": "Submit Self-Assessment",
+			},
+			"Pending Manager Review": {
+				"actor": self.ro_user,
+				"complete": bool(self.ratings) and all(r.ro_rating for r in self.ratings),
+				"action": "Submit Manager Review",
+			},
+			"Pending Director Review": {
+				"actor": self.first_director_user,
+				"complete": bool((self.first_director_feedback or "").strip()),
+				"action": ("Forward to Final Director" if self.needs_second_director
+				           else "Complete Appraisal"),
+			},
+			"Pending Final Director": {
+				"actor": self.second_director_user,
+				"complete": bool((self.second_director_feedback or "").strip()),
+				"action": "Complete Appraisal",
+			},
+		}
+
+	def _auto_advance_workflow(self):
+		"""Move the appraisal to the next stage as soon as the person whose turn
+		it is has finished their part and saved.
+
+		Frappe keeps the workflow action on a separate button from Save, so the
+		normal flow is "fill everything -> Save -> click the action too". People
+		reasonably stop after Save, which left completed appraisals sitting in
+		their old state (e.g. a fully-filled self-assessment still showing
+		"Pending Self-Assessment"). Saving a finished section is the submit.
+
+		Only the person who owns the current stage triggers this - HR saving a
+		document for any other reason must not push it forward, and HR still has
+		the explicit "HR: Skip to ..." actions for stepping in.
+		"""
+		if frappe.flags.in_appraisal_auto_advance:
+			return                                  # re-entry from our own save
+		plan = self._stage_plan().get(self.workflow_state)
+		if not plan or not plan["complete"]:
+			return
+		actor = (plan["actor"] or "").lower()
+		if not actor or actor != (frappe.session.user or "").lower():
+			return
+
+		from frappe.model.workflow import apply_workflow
+
+		frappe.flags.in_appraisal_auto_advance = True
+		try:
+			apply_workflow(self.as_dict(), plan["action"])
+		except Exception:
+			# never let this block the save the user actually asked for - the
+			# explicit workflow button is still there as a fallback
+			frappe.log_error(f"auto-advance failed for {self.name}", "Logikview Appraisal")
+		finally:
+			frappe.flags.in_appraisal_auto_advance = False
+
 	def _validate_mandatory_on_transition(self):
 		"""Block moving past a stage unless that stage's owner actually filled
 		everything in - a stage transition means the workflow_state changed
