@@ -292,7 +292,9 @@ def _setup_policies():
 		frappe.db.commit()
 	ws = frappe.get_doc({
 		"doctype": "Workspace", "name": POLICIES, "title": POLICIES, "label": POLICIES,
-		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "policy", "sequence_id": 0.4,
+		# "policy" is not in Frappe's icon sprite, so the sidebar rendered no
+		# icon at all and the label sat out of line with every other entry
+		"public": 1, "is_standard": 0, "is_hidden": 0, "icon": "clipboard", "sequence_id": 0.4,
 		"content": json.dumps(content),
 		"custom_blocks": [{"custom_block_name": POLICIES, "label": POLICIES},
 		                  {"custom_block_name": HOLIDAYS, "label": HOLIDAYS}],
