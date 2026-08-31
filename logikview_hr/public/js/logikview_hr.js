@@ -19,3 +19,37 @@
 		subtree: true,
 	});
 })();
+
+// The "My Documents" shortcut is accurate for an employee, who only ever sees
+// their own files, but misleading for HR, whose row-level access covers the
+// whole company. One shared workspace shortcut cannot carry two labels, so the
+// text is swapped in the DOM for HR only. Purely cosmetic - it is the same
+// shortcut to the same list, and the underlying permissions are unchanged.
+(function () {
+	if (!frappe.user || !frappe.user.has_role) return;
+	if (!(frappe.user.has_role("HR Manager") || frappe.user.has_role("HR User"))) return;
+
+	var FROM = "My Documents";
+	var TO = "Employee Documents";
+
+	function relabel() {
+		document
+			.querySelectorAll('[data-widget-name="' + FROM + '"] .widget-title')
+			.forEach(function (el) {
+				// only touch the text node, so the icon markup beside it survives
+				el.childNodes.forEach(function (n) {
+					if (n.nodeType === 3 && n.nodeValue.trim() === FROM) {
+						n.nodeValue = n.nodeValue.replace(FROM, TO);
+					}
+				});
+				if (el.textContent.trim() === FROM) el.textContent = TO;
+			});
+	}
+
+	relabel();
+	// shortcuts re-render on every workspace switch
+	new MutationObserver(relabel).observe(document.body, {
+		childList: true,
+		subtree: true,
+	});
+})();

@@ -47,7 +47,15 @@ def _general_departments(s):
 
 
 def _top_director(emp, d_one, d_two):
-    """Walk reports_to to the root; return (first_director, needs_second, second_director)."""
+    """Return (first_director, needs_second, second_director).
+
+    Every appraisal is now seen by BOTH directors, whichever team the employee
+    sits in - it used to be two-step only for Director One's team and a single
+    signature for Director Two's, which meant half the company was reviewed by
+    one director and half by two. The director in the employee's own reporting
+    line reviews first, so the person closest to the work comments before it is
+    closed out by the other.
+    """
     seen = set()
     cur = emp
     root = None
@@ -58,11 +66,14 @@ def _top_director(emp, d_one, d_two):
             root = cur
             break
         cur = parent
-    if root == d_one:                       # Director One's team -> two-step
-        return d_one, 1, d_two
-    if root == d_two:                       # Director Two's team -> single
-        return d_two, 0, None
-    return d_two, 0, None                   # fallback: route to Director Two
+
+    # only one director configured - nothing to hand over to
+    if not d_one or not d_two or d_one == d_two:
+        return (d_one or d_two), 0, None
+
+    if root == d_two:                       # their own director reviews first
+        return d_two, 1, d_one
+    return d_one, 1, d_two
 
 
 def _rating_rows(assessment_type):

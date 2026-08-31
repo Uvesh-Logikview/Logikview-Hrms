@@ -284,6 +284,10 @@ fixtures = [
 		"Employee-gender-link_filters",
 		"Employee-salutation-link_filters",
 		"Attendance Request-custom_late_category-in_standard_filter",
+		# a people directory sorted by "last modified" is effectively random -
+		# alphabetical so everyone is findable on the first page
+		"Employee-main-sort_field",
+		"Employee-main-sort_order",
 		"Leave Allocation-leave_type-link_filters",
 		"Compensatory Leave Request-leave_type-default",
 		"Attendance Request-custom_late_category-in_list_view",
