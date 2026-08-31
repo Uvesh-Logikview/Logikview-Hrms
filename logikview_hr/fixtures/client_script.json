@@ -92,10 +92,10 @@
   "doctype": "Client Script",
   "dt": "Employee",
   "enabled": 1,
-  "modified": "2026-08-31 12:49:09.608174",
+  "modified": "2026-08-31 12:55:10.571178",
   "module": null,
   "name": "Employee Hide Attendance Exempt Filter",
-  "script": "frappe.listview_settings['Employee'] = frappe.listview_settings['Employee'] || {};\n(function () {\n    var orig = frappe.listview_settings['Employee'].onload;\n    frappe.listview_settings['Employee'].onload = function (listview) {\n        if (orig) orig(listview);\n        if (frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $('[data-fieldname=\"custom_exempt_from_attendance\"]')\n                .closest('.filter-field, .standard-filter-section, .list-sidebar-label').hide();\n        }, 800);\n    };\n})();\n",
+  "script": "frappe.listview_settings['Employee'] = frappe.listview_settings['Employee'] || {};\n(function () {\n    var orig = frappe.listview_settings['Employee'].onload;\n    frappe.listview_settings['Employee'].onload = function (listview) {\n        if (orig) orig(listview);\n        if (frappe.user.has_role('System Manager')) return;\n\n        // Hide ONLY this one filter control. The previous version used\n        // .closest('.filter-field, .standard-filter-section, .list-sidebar-label'),\n        // and .standard-filter-section is the single container holding EVERY\n        // standard filter (ID, Full Name, Department...), so for anyone without\n        // System Manager it hid the entire filter bar rather than one checkbox.\n        // Never walk further up than the individual .frappe-control.\n        function hideOne() {\n            document\n                .querySelectorAll('[data-fieldname=\"custom_exempt_from_attendance\"]')\n                .forEach(function (el) {\n                    var ctrl = el.closest('.frappe-control');\n                    (ctrl || el).style.display = 'none';\n                });\n        }\n        hideOne();\n        setTimeout(hideOne, 600);   // filters render asynchronously\n    };\n})();\n",
   "view": "List"
  },
  {
