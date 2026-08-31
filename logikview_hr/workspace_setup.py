@@ -65,20 +65,23 @@ SHORTCUTS = [
 
 
 def _home_content():
+	# Order: who you are and what you can DO first, then the things you read.
+	# Employee Details used to sit below the leave/appraisal cards, which pushed
+	# the shortcuts - the actual actions - most of the way down the page.
 	blocks = [
 		{"id": "lvh_cel", "type": "custom_block",
 		 "data": {"custom_block_name": CELEBRATIONS, "col": 12}},
 		{"id": "lvh_card", "type": "custom_block", "data": {"custom_block_name": CARD, "col": 12}},
-		{"id": "lvh_leave", "type": "custom_block",
-		 "data": {"custom_block_name": LEAVE_BAL, "col": 12}},
-		{"id": "lvh_appr", "type": "custom_block",
-		 "data": {"custom_block_name": APPRAISAL_BLK, "col": 12}},
 		{"id": "lvh_hdr", "type": "header",
 		 "data": {"text": '<span class="h4"><b>Employee Details</b></span>', "col": 12}},
 	]
 	for i, s in enumerate(SHORTCUTS):
 		blocks.append({"id": f"lvh_sc{i}", "type": "shortcut",
 		               "data": {"shortcut_name": s["label"], "col": 4}})
+	blocks.append({"id": "lvh_leave", "type": "custom_block",
+	               "data": {"custom_block_name": LEAVE_BAL, "col": 12}})
+	blocks.append({"id": "lvh_appr", "type": "custom_block",
+	               "data": {"custom_block_name": APPRAISAL_BLK, "col": 12}})
 	# Team attendance report — role-gated to HR/admin (block carries its own title),
 	# so only HR Manager / System Manager see it on Home; employees don't.
 	blocks.append({"id": "lvh_dash_home", "type": "custom_block",

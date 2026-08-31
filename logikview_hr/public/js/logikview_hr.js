@@ -23,26 +23,36 @@
 // The "My Documents" shortcut is accurate for an employee, who only ever sees
 // their own files, but misleading for HR, whose row-level access covers the
 // whole company. One shared workspace shortcut cannot carry two labels, so the
-// text is swapped in the DOM for HR only. Purely cosmetic - it is the same
-// shortcut to the same list, and the underlying permissions are unchanged.
+// text is swapped in the DOM for HR only. Purely cosmetic - same shortcut, same
+// list, permissions unchanged.
+//
+// The role test lives INSIDE relabel(): this file is loaded via app_include_js,
+// which runs before frappe.boot has populated the user's roles, so checking up
+// front returned false and the whole thing silently never ran.
 (function () {
-	if (!frappe.user || !frappe.user.has_role) return;
-	if (!(frappe.user.has_role("HR Manager") || frappe.user.has_role("HR User"))) return;
-
 	var FROM = "My Documents";
 	var TO = "Employee Documents";
 
+	function isHR() {
+		try {
+			return frappe.user.has_role("HR Manager") || frappe.user.has_role("HR User");
+		} catch (e) {
+			return false;   // roles not loaded yet - a later mutation will retry
+		}
+	}
+
 	function relabel() {
+		if (!isHR()) return;
 		document
 			.querySelectorAll('[data-widget-name="' + FROM + '"] .widget-title')
 			.forEach(function (el) {
-				// only touch the text node, so the icon markup beside it survives
-				el.childNodes.forEach(function (n) {
-					if (n.nodeType === 3 && n.nodeValue.trim() === FROM) {
-						n.nodeValue = n.nodeValue.replace(FROM, TO);
-					}
-				});
-				if (el.textContent.trim() === FROM) el.textContent = TO;
+				// set_title() wraps the label in <span class="ellipsis">, so the
+				// text is not a direct child of .widget-title
+				var target = el.querySelector("span") || el;
+				if (target.textContent.trim() === FROM) {
+					target.textContent = TO;
+					target.setAttribute("title", TO);
+				}
 			});
 	}
 
