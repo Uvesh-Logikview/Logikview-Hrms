@@ -256,3 +256,106 @@ body[data-route^="Workspaces"] .page-title .title-text {
 		transform: none;
 	}
 }
+
+
+/* --- desk-wide brand tokens ---------------------------------------------
+   Everything above this line only reached the Workspace pages. Frappe drives
+   the WHOLE desk - list views, forms, modals, navbar, sidebar - from CSS
+   custom properties on :root, so re-pointing those themes every page at once
+   without overriding a single Frappe rule. That also means an upgrade cannot
+   break it: if Frappe renames a token, its own default simply applies again.
+
+   Only tokens verified to exist in frappe/public/scss are set here.
+
+   Two constraints that shaped this:
+     * Primary buttons render as color:var(--neutral) (white) on
+       background:var(--btn-primary), so --btn-primary MUST stay dark. Gold
+       would be white-on-gold at 1.6:1. Charcoal gives 8.9:1.
+     * The navbar keeps a light background on purpose - the logo wordmark is
+       charcoal, so it would disappear on a charcoal bar. It gets a gold
+       hairline underneath instead. */
+:root {
+	/* surfaces - warm cream instead of cool grey/white */
+	--bg-color: #faf8f5;
+	--fg-color: #ffffff;
+	--card-bg: #ffffff;
+	--navbar-bg: #fffdfa;
+	--modal-bg: #ffffff;
+	--popover-bg: #ffffff;
+	--toast-bg: #ffffff;
+	--subtle-accent: #f5f2ed;
+	--subtle-fg: #f4f1ee;
+	--control-bg: #f4f1ee;
+	--control-bg-on-gray: #ece6de;
+	--awesomebar-focus-bg: #ffffff;
+	--sidebar-select-color: #f1ece4;
+	--fg-hover-color: #f5f2ed;
+	--btn-default-bg: #f4f1ee;
+	--btn-default-hover-bg: #ece6de;
+
+	/* lines */
+	--border-color: #e7e2dc;
+	--dark-border-color: #d8d1c8;
+	--table-border-color: #e7e2dc;
+	--btn-group-border-color: #ded7cf;
+	--scrollbar-thumb-color: #ded7cf;
+
+	/* type */
+	--heading-color: #221f1e;
+	--text-neutral: #221f1e;
+	--text-color: #2f2b2a;
+	--text-muted: #5c5551;
+	--text-light: #7d746e;
+	/* #a89f99 measured 2.31:1 against --control-bg - below the 3:1 floor for
+	   placeholder text, so it was darkened until it actually passes (3.20:1
+	   on the control fill, 3.61:1 on white). */
+	--placeholder-color: #8f857e;
+
+	/* brand */
+	--primary-color: #4d4948;
+	--brand-color: #4d4948;
+	--btn-primary: #4d4948;
+	--border-primary: #4d4948;
+	--checkbox-color: #4d4948;
+
+	/* gold is the highlight, never a text colour */
+	--highlight-color: #fdf6e0;
+	--yellow-highlight-color: #fff3c4;
+	--checkbox-focus-shadow: 0 0 0 2px rgba(248, 195, 0, .45);
+}
+
+/* gold hairline under the navbar - brand presence without hiding the logo */
+.navbar {
+	border-bottom: 2px solid var(--lv-gold);
+}
+
+/* active sidebar entry gets a gold marker */
+.desk-sidebar .standard-sidebar-item.selected,
+.list-sidebar .sidebar-item.selected {
+	position: relative;
+}
+.desk-sidebar .standard-sidebar-item.selected::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 6px;
+	bottom: 6px;
+	width: 3px;
+	border-radius: 2px;
+	background: var(--lv-gold);
+}
+
+/* focus rings in gold rather than the stock blue */
+.form-control:focus,
+.input-with-feedback:focus,
+.awesomplete > input:focus {
+	border-color: var(--lv-amber);
+	box-shadow: 0 0 0 2px rgba(248, 195, 0, .30);
+}
+
+/* primary buttons: charcoal field, gold lift on hover */
+.btn-primary:hover,
+.btn-primary:focus {
+	background-color: var(--lv-navy-700);
+	box-shadow: 0 3px 10px rgba(77, 73, 72, .30);
+}
