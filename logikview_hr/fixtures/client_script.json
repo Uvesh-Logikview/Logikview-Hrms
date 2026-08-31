@@ -97,5 +97,16 @@
   "name": "Employee Hide Attendance Exempt Filter",
   "script": "frappe.listview_settings['Employee'] = frappe.listview_settings['Employee'] || {};\n(function () {\n    var orig = frappe.listview_settings['Employee'].onload;\n    frappe.listview_settings['Employee'].onload = function (listview) {\n        if (orig) orig(listview);\n        if (frappe.user.has_role('System Manager')) return;\n        setTimeout(function () {\n            $('[data-fieldname=\"custom_exempt_from_attendance\"]')\n                .closest('.filter-field, .standard-filter-section, .list-sidebar-label').hide();\n        }, 800);\n    };\n})();\n",
   "view": "List"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Leave Application",
+  "enabled": 1,
+  "modified": "2026-08-31 12:29:46.856270",
+  "module": null,
+  "name": "Leave Application Hide Expired Column",
+  "script": "\nfrappe.ui.form.on('Leave Application', {\n    refresh(frm) {\n        // HRMS renders the \"Allocated Leaves\" table from its own template\n        // (leave_application_dashboard.html), so the Expired Leaves column is\n        // dropped here rather than by patching another app - a bench update\n        // would overwrite that. Matched on the header TEXT, not a fixed index,\n        // so a future column reorder upstream can't delete the wrong one.\n        var tries = 0;\n        function strip() {\n            var removed = false;\n            $(frm.dashboard.wrapper).find('table').each(function () {\n                var $t = $(this), idx = -1;\n                $t.find('thead th').each(function (i) {\n                    var t = $(this).text().trim();\n                    if (t === __('Expired Leaves') || t === 'Expired Leaves') idx = i;\n                });\n                if (idx === -1) return;\n                $t.find('thead th').eq(idx).remove();\n                $t.find('tbody tr').each(function () { $(this).find('td').eq(idx).remove(); });\n                var cols = $t.find('thead th').length;\n                if (cols) $t.find('thead th').css('width', (100 / cols).toFixed(2) + '%');\n                removed = true;\n            });\n            // the table is added asynchronously after a server call, so keep\n            // looking briefly instead of relying on one lucky timeout\n            if (!removed && ++tries < 12) setTimeout(strip, 250);\n        }\n        setTimeout(strip, 200);\n    }\n});\n",
+  "view": "Form"
  }
 ]

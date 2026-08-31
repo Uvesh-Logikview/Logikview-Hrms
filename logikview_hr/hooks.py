@@ -316,6 +316,7 @@ fixtures = [
 		"Employee Hide Assignments",
 		"Employee Hide Attendance Exempt Field",
 		"Employee Hide Attendance Exempt Filter",
+		"Leave Application Hide Expired Column",
 	]]]},
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},
