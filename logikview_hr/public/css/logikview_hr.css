@@ -20,15 +20,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-	--lv-navy: #1f4e78;
-	--lv-navy-700: #17395a;
-	--lv-navy-50: #eef4fa;
-	--lv-amber: #d8871f;
-	--lv-ink: #16202b;
-	--lv-ink-60: #566674;
-	--lv-ink-40: #8794a1;
-	--lv-line: #e4ebf2;
-	--lv-canvas: #f6f8fb;
+	/* Sampled straight from the logo: the wordmark is a warm charcoal and
+	   "view" is a gold that runs to amber. The old navy appeared nowhere in
+	   the mark, so the whole desk now sits on the real brand colours.
+	   Gold is a fill/highlight only - at ~1.7:1 on white it can never carry
+	   text, so anything that has to be read uses charcoal or the darker amber. */
+	--lv-navy: #4d4948;          /* brand charcoal (kept the token name so every
+	                                downstream rule keeps working) */
+	--lv-navy-700: #3a3736;
+	--lv-navy-50: #f4f1ee;
+	--lv-gold: #f8c300;          /* the "view" gold - fills, spines, highlights */
+	--lv-amber: #d98d0e;         /* logo amber - DECORATIVE ONLY. 2.7:1 on white,
+	                                so it must never carry text. Verified, not assumed. */
+	--lv-amber-text: #996305;    /* the amber to use when it has to be READ:
+	                                5.07:1 on white, clears AA for body text */
+	--lv-ink: #221f1e;
+	--lv-ink-60: #5c5551;
+	--lv-ink-40: #928a85;
+	--lv-line: #e7e2dc;
+	--lv-canvas: #faf8f5;
 
 	--lv-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 	--lv-font-body: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -36,17 +46,17 @@
 
 	/* Accent family. Sampled around the brand navy rather than a rainbow, so
 	   eleven tiles read as one palette instead of a box of crayons. */
-	--lv-a-navy:    #1f4e78;
-	--lv-a-teal:    #0f766e;
-	--lv-a-indigo:  #3f4ea8;
-	--lv-a-violet:  #5b43c9;
-	--lv-a-emerald: #17794f;
-	--lv-a-slate:   #4a5b6b;
-	--lv-a-amber:   #b3710f;
-	--lv-a-rose:    #a8384f;
-	--lv-a-orange:  #c2610d;
-	--lv-a-cyan:    #0e7490;
-	--lv-a-blue:    #1f63b8;
+	--lv-a-navy:    #4d4948;
+	--lv-a-teal:    #0f6f66;
+	--lv-a-indigo:  #4a4f96;
+	--lv-a-violet:  #6b4aa8;
+	--lv-a-emerald: #2c7a4b;
+	--lv-a-slate:   #6b625c;
+	--lv-a-amber:   #c07f08;
+	--lv-a-rose:    #a83f45;
+	--lv-a-orange:  #d18e05;
+	--lv-a-cyan:    #16707f;
+	--lv-a-blue:    #35608f;
 }
 
 /* --- desk chrome ------------------------------------------------------- */
@@ -57,8 +67,8 @@ body[data-route^="Workspaces"] .layout-main-section-wrapper,
 body[data-route^="Workspaces"] .layout-main {
 	background-color: var(--lv-canvas);
 	background-image:
-		radial-gradient(1100px 520px at 12% -8%, rgba(31, 78, 120, 0.075), transparent 62%),
-		radial-gradient(900px 460px at 92% 4%, rgba(216, 135, 31, 0.055), transparent 60%);
+		radial-gradient(1100px 520px at 12% -8%, rgba(248, 195, 0, 0.10), transparent 62%),
+		radial-gradient(900px 460px at 92% 4%, rgba(77, 73, 72, 0.055), transparent 60%);
 	background-attachment: fixed;
 	background-repeat: no-repeat;
 }
@@ -95,7 +105,7 @@ body[data-route^="Workspaces"] .page-title .title-text {
 	width: 4px;
 	height: 1em;
 	border-radius: 3px;
-	background: linear-gradient(180deg, var(--lv-navy), var(--lv-amber));
+	background: linear-gradient(180deg, var(--lv-navy), var(--lv-gold));
 }
 
 /* --- shortcut tiles ---------------------------------------------------- */
