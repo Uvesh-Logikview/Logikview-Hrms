@@ -19,7 +19,7 @@ class LogikviewAppraisal(Document):
 	def _stage_plan(self):
 		return {
 			"Pending Self-Assessment": {
-				"actor": self.employee_user,
+				"actors": [self.employee_user],
 				"complete": (
 					all(r.employee_rating for r in self.ratings)
 					and all((self.get(q) or "").strip()
@@ -28,18 +28,24 @@ class LogikviewAppraisal(Document):
 				"action": "Submit Self-Assessment",
 			},
 			"Pending Manager Review": {
-				"actor": self.ro_user,
+				"actors": [self.ro_user],
 				"complete": bool(self.ratings) and all(r.ro_rating for r in self.ratings),
 				"action": "Submit Manager Review",
 			},
+			# EITHER director may write the director feedback and move it on.
+			# The form already lets any senior write it (see senior_users in the
+			# client script), so locking the advance to one specific director was
+			# inconsistent: in practice the other director writes the comment, the
+			# save did not match the expected actor, and the appraisal sat at
+			# "Pending Director Review" with the feedback already filled in.
 			"Pending Director Review": {
-				"actor": self.first_director_user,
+				"actors": [self.first_director_user, self.second_director_user],
 				"complete": bool((self.first_director_feedback or "").strip()),
 				"action": ("Forward to Final Director" if self.needs_second_director
 				           else "Complete Appraisal"),
 			},
 			"Pending Final Director": {
-				"actor": self.second_director_user,
+				"actors": [self.second_director_user, self.first_director_user],
 				"complete": bool((self.second_director_feedback or "").strip()),
 				"action": "Complete Appraisal",
 			},
@@ -64,8 +70,9 @@ class LogikviewAppraisal(Document):
 		plan = self._stage_plan().get(self.workflow_state)
 		if not plan or not plan["complete"]:
 			return
-		actor = (plan["actor"] or "").lower()
-		if not actor or actor != (frappe.session.user or "").lower():
+		me = (frappe.session.user or "").lower()
+		actors = {(a or "").lower() for a in plan["actors"] if a}
+		if not actors or me not in actors:
 			return
 
 		from frappe.model.workflow import apply_workflow
