@@ -276,6 +276,9 @@ fixtures = [
 		"Employee-custom_exempt_from_attendance",
 		"Employee-custom_notify_before_shift",
 		"Attendance Request-workflow_state",
+		# a claim can only be checked against its bill, so every expense line
+		# carries its own receipt
+		"Expense Claim Detail-custom_receipt",
 	]]]},
 	# Regularization (Feature 2): "Late Arrival" reason option, the rename to
 	# "Regularization", and the late-category colour indicator on the list view.
@@ -299,14 +302,19 @@ fixtures = [
 		"Employee Checkin-device_id-in_standard_filter",
 		"Employee Checkin-custom_auto_checkout-in_list_view",
 		"Employee Checkin-custom_auto_checkout-in_standard_filter",
+		# the expense row grid renders at most 11 columns' worth and was already
+		# at exactly 11 - Sanctioned Amount gives up a column so Receipt fits
+		"Expense Claim Detail-sanctioned_amount-columns",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
-	# Employee role needs "submit" here so the reporting manager (who only
-	# carries the Employee role) can complete the Approve workflow action
-	# themselves - the workflow's allowed-role + condition is what actually
-	# restricts this to the right manager, not the base permission. Combined
-	# into one filter block - a doctype named in two separate fixture blocks
-	# has each export overwrite the same file rather than merge.
+	# Row-level access for the request doctypes. Where a reporting manager
+	# approves (leave, comp-off) the Employee role also needs "submit", since
+	# managers carry only that role and the workflow's allowed-role + condition
+	# is what actually restricts the action to the right manager. Attendance
+	# Request is the exception - regularization is decided by HR alone, so the
+	# Employee role has no submit there.
+	# Combined into one filter block: a doctype named in two separate fixture
+	# blocks has each export overwrite the same file rather than merge.
 	{"dt": "Custom DocPerm", "filters": [["parent", "in", [
 		"Compensatory Leave Request", "Leave Application", "Attendance Request",
 	]]]},

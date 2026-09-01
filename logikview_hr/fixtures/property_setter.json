@@ -1,6 +1,22 @@
 [
  {
   "default_value": null,
+  "doc_type": "Expense Claim Detail",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "sanctioned_amount",
+  "is_system_generated": 1,
+  "modified": "2026-09-01 10:15:44.483188",
+  "module": null,
+  "name": "Expense Claim Detail-sanctioned_amount-columns",
+  "property": "columns",
+  "property_type": "Int",
+  "row_name": null,
+  "value": "1"
+ },
+ {
+  "default_value": null,
   "doc_type": "Attendance Request",
   "docstatus": 0,
   "doctype": "Property Setter",

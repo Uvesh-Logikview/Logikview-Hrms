@@ -13,6 +13,7 @@
   "document_number",
   "sec_file",
   "attachment",
+  "document_name",
   "notes"
  ],
  "fields": [
@@ -56,11 +57,17 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Upload the file, or use <b>Link</b> in the upload box to point at a Google Drive / SharePoint file instead of uploading a copy.",
    "fieldname": "attachment",
    "fieldtype": "Attach",
-   "in_list_view": 1,
    "label": "File",
    "reqd": 1
+  },
+  {
+   "description": "Leave blank to use the uploaded file's own name.",
+   "fieldname": "document_name",
+   "fieldtype": "Data",
+   "label": "Document Name"
   },
   {
    "fieldname": "notes",
@@ -132,6 +139,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "title_field": "document_type",
+ "title_field": "document_name",
  "track_changes": 1
 }
