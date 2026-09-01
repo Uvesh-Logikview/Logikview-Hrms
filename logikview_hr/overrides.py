@@ -9,6 +9,7 @@ from frappe.utils import getdate
 from hrms.hr.doctype.compensatory_leave_request.compensatory_leave_request import (
 	CompensatoryLeaveRequest,
 )
+from hrms.hr.doctype.expense_claim.expense_claim import ExpenseClaim
 from hrms.hr.utils import throw_overlap_error, validate_active_employee, validate_dates
 
 
@@ -63,3 +64,29 @@ class LogikviewCompensatoryLeaveRequest(CompensatoryLeaveRequest):
 		self.validate_attendance()
 		if not self.leave_type:
 			frappe.throw(_("Leave Type is mandatory"))
+
+
+class LogikviewExpenseClaim(ExpenseClaim):
+	"""This org doesn't run its books through Frappe - a claim is approved here
+	and reimbursed outside the system (bank transfer), so nothing about
+	double-entry accounting applies. No Expense Claim Type has a payable
+	account configured, and neither Employee nor HR Manager/HR User have read
+	access to Account or Cost Center - that's an Accounts-role concern, not
+	HR's, and was never granted.
+
+	Left as stock HRMS, every claim died one of two ways: "Set the default
+	account for the Expense Claim Type" on save (set_expense_account requires
+	one), or "Not permitted... No permission for Account" the moment a Payable
+	Account/Cost Center value tried to render on the form - HR could never get
+	a claim from filled-in to approved.
+
+	set_expense_account and make_gl_entries are what pull the doctype into
+	accounting; both are switched off here. Everything else - claimed vs
+	sanctioned amount, status, the approval workflow, "Mark as Paid" - is
+	untouched and still runs ERPNext's own logic."""
+
+	def set_expense_account(self, validate=False):
+		return
+
+	def make_gl_entries(self, cancel=False):
+		return

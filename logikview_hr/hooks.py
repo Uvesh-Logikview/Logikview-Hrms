@@ -305,6 +305,15 @@ fixtures = [
 		# the expense row grid renders at most 11 columns' worth and was already
 		# at exactly 11 - Sanctioned Amount gives up a column so Receipt fits
 		"Expense Claim Detail-sanctioned_amount-columns",
+		# no chart of accounts is managed here (see LogikviewExpenseClaim in
+		# overrides.py) - these fields are Accounts-role territory, and neither
+		# Employee nor HR has read access to Account or Cost Center, so
+		# rendering a fetched value on the form threw "No permission for
+		# Account" before HR could ever open a claim to approve it
+		"Expense Claim-payable_account-hidden",
+		"Expense Claim-payable_account-mandatory_depends_on",
+		"Expense Claim-accounting_dimensions_section-hidden",
+		"Expense Claim-mode_of_payment-hidden",
 	]]]},
 	{"dt": "Translation", "filters": [["source_text", "=", "Attendance Request"]]},
 	# Row-level access for the request doctypes. Where a reporting manager
@@ -333,6 +342,14 @@ fixtures = [
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},
 	{"dt": "Logikview Checkin Settings"},
+	# Generic expense categories - the site shipped with none, so the "Expense
+	# Claim Type" dropdown on a new claim was empty and nobody could raise one.
+	# No default_account on any of them: LogikviewExpenseClaim never looks for
+	# one (see overrides.py).
+	{"dt": "Expense Claim Type", "filters": [["name", "in", [
+		"Travel", "Food & Refreshments", "Client Entertainment", "Office Supplies",
+		"Communication & Internet", "Training & Certification", "Other",
+	]]]},
 	# Appraisal cycle (Feature 3): workflow + its states/actions + the director
 	# routing config (single). The DocTypes themselves ship as app module JSON.
 	{"dt": "Workflow", "filters": [["name", "in", [
@@ -422,6 +439,10 @@ override_doctype_class = {
 	# HRMS refuses a comp-off claim unless the employee was present every day in
 	# the range; Logikview allows the claim regardless (see overrides.py)
 	"Compensatory Leave Request": "logikview_hr.overrides.LogikviewCompensatoryLeaveRequest",
+	# no chart of accounts is managed here - expense claims are approved and
+	# reimbursed outside Frappe, so the GL-posting side of the doctype is
+	# switched off (see overrides.py)
+	"Expense Claim": "logikview_hr.overrides.LogikviewExpenseClaim",
 }
 
 # the stock Employee tree runs through our row-level filter, so a regular

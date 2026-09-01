@@ -1,0 +1,72 @@
+[
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Travel",
+  "modified": "2026-09-01 11:15:09.971778",
+  "name": "Travel"
+ },
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Food & Refreshments",
+  "modified": "2026-09-01 11:15:10.107710",
+  "name": "Food & Refreshments"
+ },
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Client Entertainment",
+  "modified": "2026-09-01 11:15:10.109659",
+  "name": "Client Entertainment"
+ },
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Office Supplies",
+  "modified": "2026-09-01 11:15:10.112020",
+  "name": "Office Supplies"
+ },
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Communication & Internet",
+  "modified": "2026-09-01 11:15:10.113995",
+  "name": "Communication & Internet"
+ },
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Training & Certification",
+  "modified": "2026-09-01 11:15:10.115467",
+  "name": "Training & Certification"
+ },
+ {
+  "accounts": [],
+  "deferred_expense_account": 0,
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Expense Claim Type",
+  "expense_type": "Other",
+  "modified": "2026-09-01 11:15:10.120379",
+  "name": "Other"
+ }
+]
