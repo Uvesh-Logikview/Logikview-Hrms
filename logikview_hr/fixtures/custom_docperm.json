@@ -370,7 +370,7 @@
   "export": 1,
   "if_owner": 0,
   "import": 0,
-  "modified": "2026-08-26 18:06:23.451610",
+  "modified": "2026-09-01 10:04:27.579989",
   "name": "aea4q0p9qi",
   "parent": "Attendance Request",
   "permlevel": 0,
@@ -380,7 +380,7 @@
   "role": "Employee",
   "select": 0,
   "share": 1,
-  "submit": 1,
+  "submit": 0,
   "write": 1
  },
  {
