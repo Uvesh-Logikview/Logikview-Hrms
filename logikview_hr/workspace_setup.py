@@ -53,12 +53,12 @@ SHORTCUTS = [
 	 "doc_view": "List", "stats_filter": "[]"},
 	{"type": "DocType", "link_to": "Logikview Appraisal", "label": "Appraisal", "color": "Green",
 	 "doc_view": "List", "stats_filter": "[]"},
-	{"type": "DocType", "link_to": "Fun Friday Idea", "label": "Fun Friday", "color": "Orange",
-	 "doc_view": "List", "stats_filter": "[]"},
-	# both are row-level filtered (see permissions.py): an employee sees their
-	# own check-ins, and themselves plus anyone reporting to them
-	{"type": "DocType", "link_to": "Employee Checkin", "label": "Employee Checkin", "color": "Cyan",
-	 "doc_view": "List", "stats_filter": "[]"},
+	# Fun Friday is hidden rather than deleted - the shortcut is gone and the
+	# Employee role no longer has access to the doctype, but the ideas and votes
+	# already collected are untouched, so it can be brought back by restoring
+	# this entry and the role.
+	# row-level filtered (see permissions.py): an employee sees themselves plus
+	# anyone reporting to them
 	{"type": "DocType", "link_to": "Employee", "label": "Employee", "color": "Blue",
 	 "doc_view": "List", "stats_filter": "[]"},
 ]
