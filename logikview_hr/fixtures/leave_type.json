@@ -21,9 +21,9 @@
   "leave_type_name": "Casual Leave",
   "max_continuous_days_allowed": 0,
   "max_encashable_leaves": 0,
-  "max_leaves_allowed": 12.0,
+  "max_leaves_allowed": 999.0,
   "maximum_carry_forwarded_leaves": 0.0,
-  "modified": "2026-09-04 10:31:21.154866",
+  "modified": "2026-09-04 11:40:16.744596",
   "name": "Casual Leave",
   "non_encashable_leaves": 0,
   "rounding": ""
