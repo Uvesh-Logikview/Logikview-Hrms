@@ -259,7 +259,13 @@ app_include_js = "/assets/logikview_hr/js/logikview_hr.js"
 # site via `bench install-app logikview_hr`. Custom HTML Block must import before
 # the "My Attendance" workspace that references it.
 fixtures = [
-	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Leave Balance", "My Holidays", "Team Celebrations", "Org Chart", "Team Leave Balance", "My Appraisal"]]]},
+	# My Leave Balance / Team Leave Balance used to live here as Server Scripts,
+	# but RestrictedPython can't import - which meant re-deriving the balance
+	# from Leave Allocation + Leave Application by hand instead of reusing
+	# HRMS's own ledger-backed get_leave_balance_on, and no way to share that
+	# logic with the enforcement hook. Both are now real whitelisted functions
+	# in logikview_hr/casual_leave.py (app_include, not a fixture).
+	{"dt": "Server Script", "filters": [["name", "in", ["Checkin Toggle", "Today Working Hours", "My Holidays", "Team Celebrations", "Org Chart", "My Appraisal"]]]},
 	{"dt": "Custom HTML Block", "filters": [["name", "in", ["Checkin button functionality", "Attendance Calendar", "Attendance Dashboard", "Leave Balance", "HR Policies", "Team Celebrations", "Holiday Calendar", "Org Chart", "Leave Management", "Appraisal & Goals"]]]},
 	{"dt": "Custom Field", "filters": [["name", "in", [
 		"Employee Checkin-custom_location_accuracy",
@@ -342,6 +348,13 @@ fixtures = [
 	# Fun Friday idea board (seed ideas ship with the app; everyone can see/add)
 	{"dt": "Fun Friday Idea"},
 	{"dt": "Logikview Checkin Settings"},
+	# Casual Leave: allow going into next month's not-yet-accrued days. HRMS's
+	# own check (validate_dates_across_allocation / balance check) treats this
+	# as unlimited-negative-with-a-warning; logikview_hr.casual_leave.
+	# enforce_advance_limit is what actually caps it at 2, and runs AFTER
+	# HRMS's own validate() (see Document.hook), so this has to be on or the
+	# core validate() throws before the cap-enforcement hook ever gets a turn.
+	{"dt": "Leave Type", "filters": [["name", "=", "Casual Leave"]]},
 	# Generic expense categories - the site shipped with none, so the "Expense
 	# Claim Type" dropdown on a new claim was empty and nobody could raise one.
 	# No default_account on any of them: LogikviewExpenseClaim never looks for
@@ -460,6 +473,10 @@ doc_events = {
 		# the stock notification only reaches leave_approver (HR); the employee's own
 		# manager approves first, so tell them too
 		"after_insert": "logikview_hr.leave.notify_manager_on_apply",
+		# Casual Leave: block borrowing more than 2 days beyond what's accrued.
+		# Runs after HRMS's own validate() (see Document.hook's compose()), which
+		# with Allow Negative Balance on only warns - this is the real cap.
+		"validate": "logikview_hr.casual_leave.enforce_advance_limit",
 	},
 	"Attendance Request": {
 		# employee-raised, capped at 3 a month (HR/admin exempt)
